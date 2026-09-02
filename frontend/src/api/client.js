@@ -38,9 +38,14 @@ export async function pedirJson(endpoint, params = {}, señal, opciones = {}) {
     // fetch solo rechaza por fallo de red; el caso típico es que el backend
     // de PHP no esté levantado.
     if (e.name === "AbortError") throw e;
+    // En desarrollo se dice cómo levantar el backend; en producción ese texto
+    // no le sirve a nadie del Registro y solo confunde.
     throw new Error(
-      `No se pudo conectar con el backend en ${URL_BASE}. ` +
-      `¿Está corriendo?  cd backend && php -S localhost:8000`
+      import.meta.env.DEV
+        ? `No se pudo conectar con el backend en ${URL_BASE}. ` +
+          `¿Está corriendo?  cd backend && PHP_CLI_SERVER_WORKERS=6 php -S localhost:8000`
+        : "No se pudo conectar con el servidor. " +
+          "Revisa tu conexión o inténtalo de nuevo en unos minutos."
     );
   }
 
