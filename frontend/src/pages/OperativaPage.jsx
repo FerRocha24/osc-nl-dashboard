@@ -9,7 +9,7 @@ import { AlertRing, AlertBar, AlertNumber } from "../components/AlertCard";
 import OscTable from "../components/OscTable";
 import ChartPanel from "../components/ChartPanel";
 import Estado from "../components/EstadoPanel";
-import { useApi } from "../api/client";
+import { pedirJson, useApi } from "../api/client";
 import "./Pages.css";
 
 const FILTROS_INICIALES = { municipio: "Todos", rubro: "Todos", estatus: "Todos" };
@@ -27,6 +27,35 @@ export default function OperativaPage() {
   };
 
   const padron = useApi("osc.php", { ...filtros, pagina, limite: POR_PAGINA });
+
+  // El reporte incluye TODAS las organizaciones que cumplen el filtro, no solo
+  // la página visible: el backend tope 500 por petición, así que se recorre en
+  // bloques hasta juntarlas.
+  const exportacion = {
+    nombre: "padron-osc",
+    etiquetaCsv: "Exportar padrón filtrado",
+    obtenerDatos: async () => {
+      const POR_BLOQUE = 500;
+      const filas = [];
+      for (let p = 1; ; p++) {
+        const bloque = await pedirJson("osc.php", { ...filtros, pagina: p, limite: POR_BLOQUE });
+        filas.push(...bloque.osc);
+        if (filas.length >= bloque.total || bloque.osc.length === 0) break;
+      }
+      return {
+        columnas: [
+          { clave: "no_registro", titulo: "Folio" },
+          { clave: "razon_social", titulo: "Razón social" },
+          { clave: "municipio", titulo: "Municipio" },
+          { clave: "rubro", titulo: "Rubro" },
+          { clave: "estatus_documental", titulo: "Estatus documental" },
+          { clave: "ultima_actualizacion", titulo: "Última actualización" },
+          { clave: "actividad_principal", titulo: "Actividad principal" },
+        ],
+        filas,
+      };
+    },
+  };
   const kpis = useApi("kpis-operativos.php");
   const registros = useApi("registros-por-mes.php", {}, []);
   const densidad = useApi("densidad-municipio.php", { limite: 8 }, []);
@@ -39,7 +68,7 @@ export default function OperativaPage() {
 
   return (
     <div className="page">
-      <Header />
+      <Header exportacion={exportacion} />
       <FilterBar valores={filtros} onChange={cambiarFiltros} />
 
       <main className="page__content">

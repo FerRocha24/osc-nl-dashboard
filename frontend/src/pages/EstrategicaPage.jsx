@@ -35,9 +35,41 @@ export default function EstrategicaPage() {
 
   const m = kpis.datos;
 
+  // La Vista Estratégica no tiene una tabla: se exportan los agregados que
+  // están en pantalla, uno tras otro con su encabezado, para que el archivo se
+  // entienda solo al abrirlo.
+  const exportacion = {
+    nombre: "resumen-estrategico",
+    etiquetaCsv: "Exportar resumen",
+    obtenerDatos: async () => ({
+      columnas: [
+        { clave: "seccion", titulo: "Sección" },
+        { clave: "concepto", titulo: "Concepto" },
+        { clave: "total", titulo: "Total" },
+        { clave: "anio_2023", titulo: "2023" },
+        { clave: "anio_2024", titulo: "2024" },
+      ],
+      filas: [
+        { seccion: "Indicadores", concepto: "Total de OSC activas", total: m?.total_osc_activas ?? 0 },
+        { seccion: "Indicadores", concepto: "Total de beneficiarios atendidos", total: m?.total_beneficiarios ?? 0 },
+        { seccion: "Indicadores", concepto: "OSC con gobernanza formal (%)", total: m?.porcentaje_gobernanza_formal ?? 0 },
+        { seccion: "Indicadores", concepto: "Dependencia de fondos públicos (%)", total: m?.porcentaje_dependencia_fondos_publicos ?? 0 },
+        ...serieRubros.map((r) => ({ seccion: "OSC por rubro", concepto: r.rubro, total: r.total })),
+        ...serieTipo.map((t) => ({
+          seccion: "Apoyos por tipo", concepto: t.tipo,
+          total: t.total, anio_2023: t.anio_2023, anio_2024: t.anio_2024,
+        })),
+        ...seriePoblacion.map((p) => ({
+          seccion: "Apoyos por población", concepto: p.poblacion,
+          total: p.total, anio_2023: p.anio_2023, anio_2024: p.anio_2024,
+        })),
+      ],
+    }),
+  };
+
   return (
     <div className="page">
-      <Header />
+      <Header exportacion={exportacion} />
       {/* Sin conectar: los endpoints de esta vista agregan sobre todo el
           padrón y todavía no aceptan filtros por municipio o rubro. */}
       <FilterBar deshabilitado />

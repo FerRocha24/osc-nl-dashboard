@@ -3,7 +3,7 @@ import ExportButton from "./ExportButton";
 import { cerrarSesion, obtenerUsuario } from "../api/auth";
 import "./Header.css";
 
-export default function Header() {
+export default function Header({ exportacion }) {
   const today = new Date().toLocaleDateString("es-MX", {
     day: "numeric",
     month: "long",
@@ -40,7 +40,7 @@ export default function Header() {
       <div className="dash-header__right">
         <span className="dash-header__date">{today}</span>
         <span className="dash-header__user">{obtenerUsuario() ?? "Sesión activa"}</span>
-        <ExportButton />
+        <ExportButton exportacion={exportacion} />
         <button type="button" className="dash-header__salir" onClick={cerrarSesion}>
           Salir
         </button>

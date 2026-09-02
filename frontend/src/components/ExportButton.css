@@ -69,3 +69,22 @@
 .export-btn__icon--xls {
   background-color: var(--color-exito);
 }
+
+.export-btn__trigger:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.export-btn__item:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.export-btn__error {
+  margin: 0;
+  padding: 8px 12px;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--color-peligro);
+  border-top: 1px solid var(--color-borde);
+}

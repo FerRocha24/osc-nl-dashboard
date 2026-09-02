@@ -63,3 +63,67 @@
     grid-template-columns: repeat(2, 1fr);
   }
 }
+
+/* ---------------------------------------------------------------------------
+   Impresión / "Guardar como PDF".
+   Se ocultan los controles que no significan nada en papel (menús, botones,
+   paginación) y se evita que las gráficas se partan a la mitad entre hojas.
+   --------------------------------------------------------------------------- */
+@media print {
+  @page {
+    margin: 14mm;
+    size: A4 portrait;
+  }
+
+  body {
+    background: #fff;
+  }
+
+  /* El header trae navegación y botones: nada de eso sirve impreso, pero el
+     nombre del tablero sí, así que se conserva solo la marca. */
+  .dash-header__tabs,
+  .dash-header__salir,
+  .export-btn,
+  .filter-bar,
+  .osc-table__pagination-controls,
+  .estado-panel__boton {
+    display: none !important;
+  }
+
+  .dash-header {
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 8px;
+  }
+
+  .page,
+  .page__content {
+    padding: 0;
+    max-width: none;
+  }
+
+  /* Que un panel no quede cortado entre dos hojas. */
+  .chart-panel,
+  .alert-card,
+  .big-number-card {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    box-shadow: none;
+  }
+
+  .page__grid--two {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  /* La tabla se imprime completa y repite el encabezado en cada página. */
+  .osc-table-wrapper {
+    overflow: visible;
+  }
+
+  .osc-table thead {
+    display: table-header-group;
+  }
+
+  .osc-table tr {
+    break-inside: avoid;
+  }
+}
