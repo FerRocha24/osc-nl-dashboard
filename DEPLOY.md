@@ -1,5 +1,21 @@
 # Despliegue
 
+> **Esta infraestructura en AWS es temporal.** Sirve para demostrar el tablero
+> funcionando de punta a punta. El destino final es el servidor del socio
+> formador (RHEL 9.7 + Apache + PHP 8.5.9); la sección
+> [Migrar al servidor definitivo](#migrar-al-servidor-definitivo) explica ese paso.
+
+## Estado actual (demo en línea)
+
+| Pieza | Dónde | URL |
+|---|---|---|
+| Frontend | Vercel | https://osc-nl-dashboard.vercel.app |
+| API | EC2 `osc-nl-api` | https://osc-nl.duckdns.org |
+| Base de datos | RDS `osc-nl-db` | privada, dentro de la VPC |
+
+Acceso al tablero: usuario `admin`, contraseña definida en `AUTH_PASSWORD_HASH`
+del VirtualHost (no está en el repositorio).
+
 Arquitectura: **base de datos y backend en AWS, frontend en Vercel.**
 
 ```
@@ -162,11 +178,56 @@ cd database && ./run_imports.sh
 
 ---
 
+## Migrar al servidor definitivo
+
+Nada de lo que hace funcionar la API depende de AWS. Para llevarla al servidor
+del socio formador:
+
+1. **Copiar `backend/`** (84 KB) a `/var/www/osc-api` o donde corresponda. No
+   usa Composer ni dependencias externas.
+2. **Instalar PHP con `pdo_mysql`.** Requiere **PHP 8.1 o superior** (se usa el
+   tipo de retorno `never`). La demo corre en 8.5.9, la misma versión que el
+   servidor de producción.
+3. **Copiar `deploy/osc-api.conf`** a la configuración de Apache y llenar las
+   variables de entorno. Permisos `600`: contiene credenciales.
+4. **Apuntar `DB_HOST`** a la base de datos que ellos usen.
+5. **Cambiar `CORS_ORIGENES`** al dominio donde quede el frontend.
+6. **Certificado TLS.** Sin HTTPS el navegador bloquea las peticiones desde una
+   página servida por HTTPS, y el token de sesión viajaría en claro.
+
+El frontend es un sitio estático: `npm run build` en `frontend/` produce `dist/`,
+que se puede servir desde cualquier servidor web. Solo necesita `VITE_API_URL`
+apuntando a la API **en tiempo de build** (Vite incrusta el valor en el bundle;
+cambiarlo después no surte efecto sin reconstruir).
+
+## Al terminar la demo
+
+Para no dejar cargos corriendo:
+
+- **Termina la instancia EC2** `osc-nl-api`
+- **NO liberes la Elastic IP `184.193.64.10`** — es la IP pública de la RDS, no
+  de la EC2. Liberarla dejaría la base sin dirección.
+- Borra el subdominio de DuckDNS si ya no se usa
+- El proyecto de Vercel en plan Hobby no genera costo
+
 ## Antes de dar acceso a alguien más
 
-- [ ] `CORS_ORIGENES` apuntando al dominio real, no vacío
-- [ ] HTTPS activo en el backend
-- [ ] RDS con `Publicly accessible = No` y backups encendidos
-- [ ] `APP_SECRET` distinto del de desarrollo
-- [ ] Contraseña del tablero distinta de la de desarrollo
-- [ ] Repositorio en **privado** (aunque los datos ya no estén dentro)
+- [x] `CORS_ORIGENES` apuntando al dominio real
+- [x] HTTPS activo (Let's Encrypt, renovación automática)
+- [x] Backups de RDS: 7 días + snapshot manual
+- [x] `APP_SECRET` generado en el servidor, distinto al de desarrollo
+- [x] Contraseña del tablero distinta a la de desarrollo
+- [x] Repositorio privado y sin datos personales dentro
+- [ ] RDS con `Publicly accessible = No` (opcional: el security group ya
+      restringe el acceso a la EC2)
+
+### Detalle que se pasa por alto
+
+Certbot **copia el VirtualHost** a `osc-api-le-ssl.conf` para el puerto 443, y
+lo crea con permisos `644` — legibles por cualquier usuario del servidor. Como
+ese archivo hereda las credenciales de la base y el `APP_SECRET`, hay que
+corregirlo cada vez que certbot lo regenere:
+
+```bash
+sudo chmod 600 /etc/httpd/conf.d/osc-api-le-ssl.conf
+```
