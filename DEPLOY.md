@@ -27,6 +27,10 @@ Datos verificados en la consola, para no tener que buscarlos otra vez:
 | Security group de la RDS | `osc-nl-db-sg` (`sg-0976de69fada0ce9c`) |
 | Backups automáticos | 7 días de retención |
 | `max_connections` | 61 |
+| **Frontend (Vercel)** | **https://osc-nl-dashboard.vercel.app** |
+
+El proyecto de Vercel está configurado con Root Directory `frontend`, preset
+Vite y la variable `VITE_API_URL`. Cada push a `main` redespliega solo.
 
 La EC2 tiene que ir en **esa misma VPC** para hablarle a la base por red
 privada. Conviene ponerla en `us-east-1f` para no pagar tráfico entre zonas.
@@ -133,8 +137,13 @@ En Vercel:
 entrar directo a `/estrategica` daría 404, porque el enrutamiento lo hace React
 en el navegador y Vercel buscaría un archivo con ese nombre.
 
-Después del primer deploy, pon el dominio que te asigne Vercel en
-`CORS_ORIGENES` del backend y reinicia Apache.
+El dominio asignado es **`https://osc-nl-dashboard.vercel.app`**, y ya está
+puesto en `CORS_ORIGENES` dentro de `backend/deploy/osc-api.conf`.
+
+`VITE_API_URL` apunta hoy a `https://pendiente.example.com` (un marcador). En
+cuanto la EC2 tenga HTTPS, cámbiala en *Project Settings → Environment
+Variables* y **vuelve a desplegar**: Vite incrusta el valor en el bundle
+durante el build, así que cambiar la variable sin redesplegar no surte efecto.
 
 ---
 
