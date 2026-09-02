@@ -14,6 +14,31 @@ exposición del proyecto.
 
 ---
 
+## Infraestructura actual
+
+Datos verificados en la consola, para no tener que buscarlos otra vez:
+
+| | |
+|---|---|
+| Región | `us-east-1` (N. Virginia) |
+| VPC | `vpc-03208f2b79e7369eb` |
+| Instancia RDS | `osc-nl-db` · MySQL 8.4.9 · `db.t3.micro` |
+| Zona de la RDS | `us-east-1f` |
+| Security group de la RDS | `osc-nl-db-sg` (`sg-0976de69fada0ce9c`) |
+| Backups automáticos | 7 días de retención |
+| `max_connections` | 61 |
+
+La EC2 tiene que ir en **esa misma VPC** para hablarle a la base por red
+privada. Conviene ponerla en `us-east-1f` para no pagar tráfico entre zonas.
+
+### Acceso actual a la base
+
+El security group solo acepta la IP de la máquina de desarrollo. Como las IP
+domésticas son dinámicas, **cuando cambie se pierde el acceso** y hay que
+actualizar la regla (*Edit inbound rules* → Source → *My IP*). En cuanto la
+EC2 esté funcionando esto deja de importar, porque el acceso pasa a ser por
+red privada.
+
 ## 1. Backend en AWS (EC2)
 
 ### Por qué EC2 y no Lambda ni un runtime de PHP en Vercel
@@ -35,8 +60,26 @@ sudo dnf install -y httpd php php-mysqlnd
 sudo systemctl enable --now httpd
 ```
 
-Copia `backend/` al servidor (por ejemplo a `/var/www/osc-api`) y apunta ahí un
-VirtualHost. Los endpoints quedan bajo `/endpoints/`.
+Copia `backend/` al servidor y apunta ahí un VirtualHost. En `backend/deploy/`
+hay dos plantillas listas:
+
+```bash
+# 1. Sube el código (excluye .env y credenciales)
+./backend/deploy/subir.sh ec2-user@LA-IP ~/.ssh/tu-llave.pem
+
+# 2. En el servidor: instala el VirtualHost
+sudo cp /var/www/osc-api/deploy/osc-api.conf /etc/httpd/conf.d/
+sudo vi /etc/httpd/conf.d/osc-api.conf        # llena los RELLENAR
+sudo chmod 600 /etc/httpd/conf.d/osc-api.conf
+sudo apachectl configtest && sudo systemctl reload httpd
+```
+
+Los endpoints quedan bajo `/endpoints/`. El `.conf` ya bloquea el acceso web a
+`config/`, a `deploy/` y a cualquier `.env`.
+
+**Por qué las credenciales van en el VirtualHost y no en un `.env`:** un archivo
+subido puede quedar legible por otros usuarios del servidor o colarse en un
+backup. En el `.conf` con permisos 600 solo lo lee root y Apache.
 
 ### Variables de entorno
 
@@ -56,14 +99,19 @@ No subas un `.env` al servidor: defínelas en la configuración de Apache
 
 ### Cerrar la base
 
-Una vez que la EC2 se conecte a la RDS:
+Una vez que la EC2 se conecte a la RDS y el backend responda desde ahí:
 
-1. En el security group de la RDS, deja una sola regla de entrada al puerto
-   3306 con origen **el security group de la EC2** (no un rango de IPs).
+1. En `osc-nl-db-sg`, cambia la regla del puerto 3306: en **Source** elige el
+   **security group de la EC2**, no un rango de IPs. Así el permiso sigue a la
+   instancia aunque cambie de IP.
 2. Pon la instancia RDS en `Publicly accessible = No`.
-3. Verifica que los backups automáticos estén activos.
 
-Hoy la RDS resuelve a una IP pública, así que este paso no es opcional.
+Hazlo **en ese orden y solo al final**: si cierras la base antes de que la EC2
+funcione, te quedas sin acceso desde la máquina de desarrollo y sin forma de
+depurar.
+
+✅ Backups: ya están en 7 días de retención, más un snapshot manual con los
+datos ya importados (los snapshots manuales no expiran).
 
 ### HTTPS
 

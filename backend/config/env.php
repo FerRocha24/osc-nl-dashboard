@@ -61,9 +61,21 @@ function cargarEnv(): void
 }
 
 // Lee una variable de entorno con valor por defecto opcional.
+//
+// Se consultan tres fuentes porque no todas funcionan en todos los montajes:
+// cuando PHP corre bajo php-fpm (lo normal en RHEL + Apache), las variables
+// que Apache define con `SetEnv` NO las ve getenv() — llegan como parámetros
+// FastCGI y aparecen en $_SERVER. Con mod_php sí las ve getenv(). Revisar las
+// tres evita que el backend funcione en local y falle en el servidor sin una
+// razón visible.
 function env(string $clave, ?string $porDefecto = null): ?string
 {
     cargarEnv();
+
     $valor = getenv($clave);
+    if ($valor === false || $valor === '') {
+        $valor = $_SERVER[$clave] ?? $_ENV[$clave] ?? false;
+    }
+
     return ($valor === false || $valor === '') ? $porDefecto : $valor;
 }
