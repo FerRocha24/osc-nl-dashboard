@@ -1,0 +1,129 @@
+.dash-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 0 32px;
+  height: 68px;
+  background-color: var(--color-superficie);
+  border-bottom: 1px solid var(--color-borde);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+.dash-header__brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.dash-header__logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background-color: var(--color-primario);
+  color: white;
+  font-family: var(--fuente-titulos);
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.dash-header__title {
+  font-family: var(--fuente-titulos);
+  font-weight: 600;
+  font-size: 16px;
+  color: var(--color-texto);
+}
+
+.dash-header__tabs {
+  display: flex;
+  gap: 4px;
+  background-color: var(--color-fondo);
+  padding: 4px;
+  border-radius: 8px;
+}
+
+.dash-tab {
+  padding: 8px 18px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-texto-suave);
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.dash-tab:hover {
+  color: var(--color-texto);
+}
+
+.dash-tab--active {
+  background-color: var(--color-superficie);
+  color: var(--color-primario);
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.dash-header__right {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-shrink: 0;
+}
+
+.dash-header__date {
+  font-size: 13px;
+  color: var(--color-texto-suave);
+}
+
+.dash-header__user {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-texto);
+}
+
+@media (max-width: 900px) {
+  .dash-header {
+    flex-wrap: wrap;
+    height: auto;
+    padding: 12px 16px;
+    gap: 12px;
+  }
+
+  .dash-header__tabs {
+    order: 3;
+    width: 100%;
+  }
+
+  .dash-tab {
+    flex: 1;
+    text-align: center;
+  }
+
+  .dash-header__date {
+    display: none;
+  }
+}
+
+/* Cerrar sesión: discreto, no compite con "Exportar reporte". */
+.dash-header__salir {
+  padding: 6px 11px;
+  font-family: var(--fuente-texto);
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--color-texto-suave);
+  background: transparent;
+  border: 1px solid var(--color-borde);
+  border-radius: 8px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.dash-header__salir:hover {
+  color: var(--color-peligro);
+  border-color: var(--color-peligro);
+}

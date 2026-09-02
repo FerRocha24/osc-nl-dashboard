@@ -1,0 +1,122 @@
+.osc-table-wrapper {
+  background-color: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio);
+  overflow: hidden;
+}
+
+.osc-table {
+  font-size: 13px;
+}
+
+.osc-table thead {
+  background-color: var(--color-fondo);
+}
+
+.osc-table th {
+  text-align: left;
+  padding: 12px 18px;
+  font-weight: 600;
+  color: var(--color-texto-suave);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  border-bottom: 1px solid var(--color-borde);
+}
+
+.osc-table td {
+  padding: 13px 18px;
+  border-bottom: 1px solid var(--color-borde);
+  color: var(--color-texto);
+}
+
+.osc-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.osc-table tbody tr:hover {
+  background-color: var(--color-fondo);
+}
+
+.osc-table__razon {
+  font-weight: 600;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.status-badge--verde {
+  background-color: #E3F3EE;
+  color: var(--color-verde);
+}
+
+.status-badge--advertencia {
+  background-color: #FBF0DC;
+  color: var(--color-advertencia);
+}
+
+.status-badge--peligro {
+  background-color: #F8E4E1;
+  color: var(--color-peligro);
+}
+
+.osc-table__pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  font-size: 12px;
+  color: var(--color-texto-suave);
+}
+
+.osc-table__pagination-controls {
+  display: flex;
+  gap: 6px;
+}
+
+.osc-table__pagination-controls button {
+  border: 1px solid var(--color-borde);
+  background-color: var(--color-superficie);
+  border-radius: 6px;
+  padding: 5px 10px;
+  font-size: 12px;
+  color: var(--color-texto);
+}
+
+.osc-table__pagination-controls button:hover:not(:disabled) {
+  background-color: var(--color-fondo);
+}
+
+.osc-table__pagination-controls button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.osc-table__page-active {
+  background-color: var(--color-primario) !important;
+  border-color: var(--color-primario) !important;
+  color: white !important;
+}
+
+@media (max-width: 700px) {
+  .osc-table-wrapper {
+    overflow-x: auto;
+  }
+  .osc-table {
+    min-width: 640px;
+  }
+}
+
+/* Folio del Registro Estatal: numérico y corto, se alinea a la derecha y con
+   tipografía tabular para que los dígitos queden en columna. */
+.osc-table__folio {
+  font-variant-numeric: tabular-nums;
+  color: var(--color-texto-suave);
+  white-space: nowrap;
+  width: 1%;
+}

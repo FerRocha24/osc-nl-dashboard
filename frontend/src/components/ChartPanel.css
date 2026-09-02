@@ -1,0 +1,17 @@
+.chart-panel {
+  background-color: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio);
+  padding: 20px 22px 12px;
+}
+
+.chart-panel__title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-texto);
+  margin-bottom: 14px;
+}
+
+.chart-panel__body {
+  width: 100%;
+}

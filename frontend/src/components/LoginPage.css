@@ -1,0 +1,105 @@
+.login {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: var(--color-fondo);
+}
+
+.login__caja {
+  width: 100%;
+  max-width: 360px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 32px 28px;
+  background: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio);
+  border-bottom: 3px solid var(--color-primario);
+}
+
+.login__marca {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.login__logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  background: var(--color-primario);
+  border-radius: 7px;
+}
+
+.login__titulo {
+  font-family: var(--fuente-titulos);
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--color-texto);
+}
+
+.login__subtitulo {
+  margin: -8px 0 4px;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--color-texto-suave);
+}
+
+.login__campo {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-texto-suave);
+}
+
+.login__campo input {
+  padding: 9px 11px;
+  font-family: var(--fuente-texto);
+  font-size: 14px;
+  color: var(--color-texto);
+  background: var(--color-fondo);
+  border: 1px solid var(--color-borde);
+  border-radius: 8px;
+}
+
+.login__campo input:focus {
+  outline: 2px solid var(--color-primario);
+  outline-offset: 1px;
+  border-color: transparent;
+}
+
+.login__error {
+  margin: 0;
+  padding: 9px 11px;
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: var(--color-peligro);
+  background: #FBEDEB;
+  border-radius: 8px;
+}
+
+.login__boton {
+  margin-top: 4px;
+  padding: 10px;
+  font-family: var(--fuente-texto);
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  background: var(--color-primario);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.login__boton:hover:not(:disabled) { background: var(--color-primario-oscuro); }
+.login__boton:disabled { opacity: 0.6; cursor: default; }

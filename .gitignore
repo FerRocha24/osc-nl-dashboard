@@ -1,0 +1,24 @@
+# Dependencias
+node_modules/
+frontend/node_modules/
+
+# Build
+dist/
+frontend/dist/
+
+# Variables de entorno / credenciales — NUNCA subir esto a GitHub
+.env
+database/.env
+backend/.env
+
+# Sistema
+.DS_Store
+*.log
+
+# Datos personales — NUNCA subir a git
+# Los .sql de importación llevan dentro los datos de contacto reales de las
+# 779 organizaciones (1,237 correos y 759 teléfonos de personas). El código
+# que los genera sí se versiona (database/imports/generate_imports.py);
+# los datos se comparten aparte, por un canal privado.
+database/imports/*.sql
+*.csv

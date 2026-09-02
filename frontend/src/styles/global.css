@@ -1,0 +1,74 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  /* Color primario */
+  --color-primario: #C2650A;
+  --color-primario-oscuro: #9C5108;
+  --color-primario-claro: #F4E3D0;
+
+  /* Acentos (apagados, tono ejecutivo) */
+  --color-rosa: #B23D74;
+  --color-morado: #6E6EC2;
+  --color-verde: #3FA383;
+  --color-azul: #5B87A8;
+
+  /* Semánticos */
+  --color-exito: #3FA383;
+  --color-advertencia: #D98E04;
+  --color-peligro: #C0392B;
+
+  /* Neutros */
+  --color-fondo: #FAF9F7;
+  --color-superficie: #FFFFFF;
+  --color-borde: #E5E1DA;
+  --color-texto: #262220;
+  --color-texto-suave: #6B6259;
+
+  /* Tipografía */
+  --fuente-titulos: 'Space Grotesk', sans-serif;
+  --fuente-texto: 'Inter', sans-serif;
+
+  /* Espaciado */
+  --radio: 10px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--fuente-texto);
+  background-color: var(--color-fondo);
+  color: var(--color-texto);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--fuente-titulos);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+button {
+  font-family: var(--fuente-texto);
+  cursor: pointer;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+/* Utilidad: focus visible para accesibilidad */
+:focus-visible {
+  outline: 2px solid var(--color-primario);
+  outline-offset: 2px;
+}

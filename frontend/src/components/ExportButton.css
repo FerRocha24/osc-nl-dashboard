@@ -1,0 +1,71 @@
+.export-btn {
+  position: relative;
+}
+
+.export-btn__trigger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 16px;
+  border: none;
+  border-radius: 8px;
+  background-color: var(--color-primario);
+  color: white;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.export-btn__trigger:hover {
+  background-color: var(--color-primario-oscuro);
+}
+
+.export-btn__menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  width: 220px;
+  background-color: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+  z-index: 30;
+}
+
+.export-btn__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 14px;
+  border: none;
+  background: none;
+  text-align: left;
+  font-size: 13px;
+  color: var(--color-texto);
+}
+
+.export-btn__item:hover {
+  background-color: var(--color-fondo);
+}
+
+.export-btn__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 22px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  color: white;
+  flex-shrink: 0;
+}
+
+.export-btn__icon--pdf {
+  background-color: var(--color-peligro);
+}
+
+.export-btn__icon--xls {
+  background-color: var(--color-exito);
+}
