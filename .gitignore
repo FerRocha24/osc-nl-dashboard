@@ -22,3 +22,7 @@ backend/.env
 # los datos se comparten aparte, por un canal privado.
 database/imports/*.sql
 *.csv
+
+# Documentos subidos al expediente digital: son archivos de las
+# organizaciones, no código. Nunca al repositorio.
+archivos/

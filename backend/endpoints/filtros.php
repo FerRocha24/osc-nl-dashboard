@@ -36,6 +36,6 @@ ejecutar(function () use ($pdo) {
         'municipios'  => array_merge(['Todos'], $municipios),
         'rubros'      => array_merge(['Todos'], $rubros),
         'categorias'  => array_merge(['Todos'], $categorias),
-        'estatus'     => ['Todos', 'Completo', 'Pendiente', 'Vencido'],
+        'estatus'     => ['Todos', 'Completo', 'Pendiente', 'Vencido', 'Rechazado'],
     ];
 });

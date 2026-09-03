@@ -1,0 +1,100 @@
+.visor__fondo {
+  position: fixed;
+  inset: 0;
+  z-index: 70;             /* por encima de la ficha de la OSC */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(38, 34, 32, 0.55);
+}
+
+.visor {
+  width: min(900px, 100%);
+  height: min(90vh, 100%);
+  display: flex;
+  flex-direction: column;
+  background: var(--color-superficie);
+  border-radius: var(--radio);
+  overflow: hidden;
+}
+
+.visor__encabezado {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--color-borde);
+}
+
+.visor__nombre {
+  margin: 0;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--color-texto);
+  overflow-wrap: anywhere;
+}
+
+.visor__acciones {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.visor__descargar {
+  padding: 6px 12px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--color-primario);
+  text-decoration: none;
+  border: 1px solid var(--color-borde);
+  border-radius: 8px;
+}
+
+.visor__descargar:hover {
+  border-color: var(--color-primario);
+  background: var(--color-primario-claro);
+}
+
+.visor__acciones button {
+  width: 30px;
+  height: 30px;
+  font-size: 15px;
+  color: var(--color-texto-suave);
+  background: transparent;
+  border: 1px solid var(--color-borde);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.visor__acciones button:hover {
+  color: var(--color-peligro);
+  border-color: var(--color-peligro);
+}
+
+.visor__cuerpo {
+  flex: 1;
+  min-height: 0;
+  background: var(--color-fondo);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.visor__iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+.visor__imagen {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+@media print {
+  .visor__fondo { display: none !important; }
+}

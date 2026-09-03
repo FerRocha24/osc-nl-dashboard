@@ -77,6 +77,57 @@ export async function pedirJson(endpoint, params = {}, señal, opciones = {}) {
   return datos;
 }
 
+/**
+ * Descarga un archivo protegido y devuelve una URL temporal para mostrarlo.
+ *
+ * No se puede poner la URL del endpoint directo en un <iframe> o <embed>: el
+ * navegador haría esa petición como una navegación normal, sin la cabecera
+ * Authorization, y el servidor respondería 401. Se baja con fetch (que sí
+ * lleva el token) y se envuelve en un blob.
+ *
+ * Quien llame es responsable de liberar la URL con URL.revokeObjectURL.
+ */
+export async function obtenerArchivo(endpoint, params = {}) {
+  const token = obtenerToken();
+  const respuesta = await fetch(construirUrl(endpoint, params), {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+
+  if (respuesta.status === 401) {
+    cerrarSesion();
+    throw new Error("Tu sesión expiró. Vuelve a iniciar sesión.");
+  }
+  if (!respuesta.ok) {
+    // El endpoint devuelve JSON cuando falla, aunque normalmente mande binario.
+    let mensaje = `No se pudo abrir el archivo (HTTP ${respuesta.status}).`;
+    try {
+      const datos = await respuesta.json();
+      if (datos?.error) mensaje = datos.error;
+    } catch { /* la respuesta no era JSON; se queda el mensaje genérico */ }
+    throw new Error(mensaje);
+  }
+
+  const blob = await respuesta.blob();
+  return { url: URL.createObjectURL(blob), tipo: blob.type };
+}
+
+// Envía datos a un endpoint que espera JSON por POST.
+export async function enviarJson(endpoint, cuerpo) {
+  return pedirJson(endpoint, {}, undefined, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(cuerpo),
+  });
+}
+
+/**
+ * Sube un archivo. No se fija Content-Type a propósito: el navegador tiene que
+ * ponerlo él para incluir el `boundary` que separa las partes del formulario.
+ */
+export async function subirArchivo(endpoint, formData) {
+  return pedirJson(endpoint, {}, undefined, { method: "POST", body: formData });
+}
+
 // Envía las credenciales y guarda la sesión si son correctas.
 export async function iniciarSesion(usuario, password) {
   const datos = await pedirJson("login.php", {}, undefined, {

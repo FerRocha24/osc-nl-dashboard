@@ -114,10 +114,22 @@ function credencialesValidas(string $usuario, string $password): bool
     return $usuarioOk && $passwordOk;
 }
 
+// Usuario de la sesión en curso, una vez validado el token.
+// Sirve para dejar constancia de quién hizo cada cosa (ver documento-revisar).
+function usuarioDeSesion(): ?string
+{
+    static $usuario = null;
+    if (func_num_args() > 0) {
+        $usuario = func_get_arg(0);
+    }
+    return $usuario;
+}
+
 // Corta la petición con 401 si no trae un token válido.
 function exigirAutenticacion(): void
 {
     if (!autenticacionHabilitada()) {
+        usuarioDeSesion('desarrollo');
         return;
     }
 
@@ -125,8 +137,11 @@ function exigirAutenticacion(): void
         ?? $_SERVER['REDIRECT_HTTP_AUTHORIZATION']  // Apache con mod_rewrite
         ?? '';
 
-    if (!preg_match('/^Bearer\s+(.+)$/i', trim($cabecera), $m)
-        || verificarToken(trim($m[1])) === null) {
+    $usuario = preg_match('/^Bearer\s+(.+)$/i', trim($cabecera), $m)
+        ? verificarToken(trim($m[1]))
+        : null;
+
+    if ($usuario === null) {
         http_response_code(401);
         header('Content-Type: application/json; charset=utf-8');
         echo json_encode(
@@ -135,4 +150,6 @@ function exigirAutenticacion(): void
         );
         exit;
     }
+
+    usuarioDeSesion($usuario);
 }

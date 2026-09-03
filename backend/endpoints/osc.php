@@ -5,7 +5,7 @@
 // Filtros opcionales por query string (todos combinables):
 //   ?municipio=Monterrey     nombre exacto del municipio
 //   ?rubro=Salud y bienestar rubro exacto
-//   ?estatus=Vencido         estatus documental agregado (Completo|Pendiente|Vencido)
+//   ?estatus=Vencido         estatus agregado (Completo|Pendiente|Vencido|Rechazado)
 //   ?q=manos                 búsqueda parcial en razón social, siglas o RFC
 //   ?limite=100&pagina=1     paginación (limite máx. 500)
 //
@@ -47,8 +47,8 @@ ejecutar(function () use ($pdo) {
     // El estatus documental es un agregado, así que se filtra con HAVING.
     $having = '';
     if ($estatus !== null) {
-        if (!in_array($estatus, ['Completo', 'Pendiente', 'Vencido'], true)) {
-            responderError("El parámetro 'estatus' debe ser Completo, Pendiente o Vencido.", 422);
+        if (!in_array($estatus, ['Completo', 'Pendiente', 'Vencido', 'Rechazado'], true)) {
+            responderError("El parámetro 'estatus' debe ser Completo, Pendiente, Vencido o Rechazado.", 422);
         }
         $having = 'HAVING estatus_documental = :estatus';
         $params[':estatus'] = $estatus;

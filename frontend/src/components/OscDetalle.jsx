@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useApi } from "../api/client";
 import Estado from "./EstadoPanel";
+import Expediente from "./Expediente";
 import "./OscDetalle.css";
 
 function Campo({ etiqueta, children }) {
@@ -28,7 +29,14 @@ export default function OscDetalle({ idOsc, onCerrar }) {
   // Escape cierra el panel, y mientras está abierto se bloquea el scroll del
   // fondo para que la rueda del ratón mueva la ficha y no la tabla de atrás.
   useEffect(() => {
-    const alPresionar = (e) => { if (e.key === "Escape") onCerrar(); };
+    const alPresionar = (e) => {
+      if (e.key !== "Escape") return;
+      // El visor de documentos se monta encima de esta ficha y también
+      // escucha Escape. Sin esta guarda, una sola pulsación cerraría los dos
+      // y la persona perdería la ficha por querer cerrar el documento.
+      if (document.querySelector(".visor")) return;
+      onCerrar();
+    };
     document.addEventListener("keydown", alPresionar);
     const overflowPrevio = document.body.style.overflow;
     document.body.style.overflow = "hidden";
@@ -115,6 +123,10 @@ export default function OscDetalle({ idOsc, onCerrar }) {
                     )}
                   </section>
                 )}
+
+                <section className="detalle__seccion">
+                  <Expediente idOsc={osc.id_osc} />
+                </section>
 
                 <section className="detalle__seccion">
                   <h3>

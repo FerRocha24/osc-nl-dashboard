@@ -24,14 +24,19 @@ const SQL_DONATARIA_VIGENTE =
 // --- SUPUESTO 2: "estatus documental" de una OSC ---------------------------
 // La tabla Documentacion guarda el estatus por documento, no por OSC.
 // Se agrega al nivel de OSC con la regla "el peor estatus manda":
-//   - si tiene algún documento Vencido      -> Vencido
+//   - si tiene algún documento Rechazado    -> Rechazado
+//   - si no, pero tiene alguno Vencido      -> Vencido
 //   - si no, pero tiene alguno Pendiente    -> Pendiente
 //   - si no tiene ningún documento cargado  -> Pendiente
 //   - en cualquier otro caso                -> Completo
+//
+// Rechazado va primero porque exige acción de la organización: un documento
+// vencido se renueva, pero uno rechazado hay que rehacerlo.
 const SQL_ESTATUS_DOCUMENTAL =
     "CASE
         WHEN COUNT(d.id_documento) = 0 THEN 'Pendiente'
-        WHEN SUM(d.estatus_validacion = 'Vencido')  > 0 THEN 'Vencido'
+        WHEN SUM(d.estatus_validacion = 'Rechazado') > 0 THEN 'Rechazado'
+        WHEN SUM(d.estatus_validacion = 'Vencido')   > 0 THEN 'Vencido'
         WHEN SUM(d.estatus_validacion = 'Pendiente') > 0 THEN 'Pendiente'
         ELSE 'Completo'
      END";
