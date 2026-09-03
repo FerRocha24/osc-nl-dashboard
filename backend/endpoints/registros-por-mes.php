@@ -3,7 +3,9 @@
 // Serie mensual de altas en el padrón, para la gráfica de línea de la
 // Vista Operativa. Agrupa OSC.fecha_registro por mes.
 //
-//   ?meses=12   cuántos meses hacia atrás incluir (1–60, por defecto 12)
+//   ?meses=12       cuántos meses hacia atrás incluir (1–60, por defecto 12)
+//   ?municipio=...  filtra por municipio
+//   ?categoria=...  filtra por categoría de rubro
 //
 // Los meses sin altas se devuelven con registros = 0 para que la línea
 // no quede con huecos.
@@ -19,18 +21,24 @@ const MESES_ABREVIADOS = [
 ejecutar(function () use ($pdo) {
     $meses = parametroEntero('meses', 12, 1, 60);
 
+    [$where, $params] = filtrosOsc();
+    $condicionFecha = "o.fecha_registro IS NOT NULL
+          AND o.fecha_registro >= DATE_SUB(DATE_FORMAT(CURDATE(), '%Y-%m-01'), INTERVAL :meses MONTH)";
+    $where = $where === '' ? "WHERE $condicionFecha" : "$where AND $condicionFecha";
+
     $sql = "
         SELECT DATE_FORMAT(o.fecha_registro, '%Y-%m') AS periodo,
                COUNT(*) AS registros
         FROM OSC o
-        WHERE o.fecha_registro IS NOT NULL
-          AND o.fecha_registro >= DATE_SUB(
-                  DATE_FORMAT(CURDATE(), '%Y-%m-01'),
-                  INTERVAL :meses MONTH)
+        LEFT JOIN Municipio m ON m.id_municipio = o.id_municipio
+        $where
         GROUP BY periodo
         ORDER BY periodo ASC";
 
     $stmt = $pdo->prepare($sql);
+    foreach ($params as $clave => $valor) {
+        $stmt->bindValue($clave, $valor, PDO::PARAM_STR);
+    }
     // -1 porque el mes en curso ya cuenta como uno de los N meses pedidos.
     $stmt->bindValue(':meses', $meses - 1, PDO::PARAM_INT);
     $stmt->execute();

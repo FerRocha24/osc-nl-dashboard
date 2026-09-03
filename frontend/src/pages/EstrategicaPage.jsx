@@ -1,13 +1,14 @@
 import { useState } from "react";
 import {
   PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend,
-  BarChart, Bar, XAxis, YAxis, CartesianGrid,
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, LineChart, Line,
 } from "recharts";
 import Header from "../components/Header";
 import FilterBar from "../components/FilterBar";
 import BigNumberCard from "../components/BigNumberCard";
 import ChartPanel from "../components/ChartPanel";
 import Estado from "../components/EstadoPanel";
+import MapaMunicipios from "../components/MapaMunicipios";
 import { useApi } from "../api/client";
 import "./Pages.css";
 
@@ -37,11 +38,28 @@ export default function EstrategicaPage() {
   const apoyosTipo = useApi("apoyos-por-tipo.php", filtros, []);
   const apoyosPoblacion = useApi("apoyos-por-poblacion.php", { ...filtros, limite: 8 }, []);
   const kpisApoyos = useApi("kpis-apoyos.php", filtros);
+  // Estas dos venían de la Vista Operativa: son lecturas del sector completo,
+  // no del trabajo diario sobre una organización, así que su lugar es aquí.
+  const registros = useApi("registros-por-mes.php", filtros, []);
+  const densidad = useApi("densidad-municipio.php", filtros, []);
 
   const serieRubros = rubros.datos ?? [];
   const serieTipo = apoyosTipo.datos ?? [];
   const seriePoblacion = apoyosPoblacion.datos ?? [];
   const totalApoyos = kpisApoyos.datos?.total_apoyos ?? 0;
+  const serieRegistros = registros.datos ?? [];
+  const serieDensidad = densidad.datos ?? [];
+  // 12 meses en cero se ve igual que un fallo de carga, así que se trata como
+  // "sin datos" y se explica por qué.
+  const sinRegistros = serieRegistros.every((m) => m.registros === 0);
+  // El mapa y la barra comparten datos, pero la barra solo muestra los de más
+  // peso: 34 municipios en barras horizontales no se leen.
+  const topDensidad = [...serieDensidad].slice(0, 10);
+
+  // Al hacer clic en un municipio del mapa se filtra la vista completa, y al
+  // volver a hacer clic en el mismo se quita el filtro.
+  const alternarMunicipio = (nombre) =>
+    setFiltros((f) => ({ ...f, municipio: f.municipio === nombre ? "Todos" : nombre }));
 
   const m = kpis.datos;
 
@@ -173,6 +191,61 @@ export default function EstrategicaPage() {
                   <Bar dataKey="anio_2023" name="2023" fill="#5B87A8" radius={[0, 4, 4, 0]} isAnimationActive={false} />
                   <Bar dataKey="anio_2024" name="2024" fill="#C2650A" radius={[0, 4, 4, 0]} isAnimationActive={false} />
                 </BarChart>
+              </ResponsiveContainer>
+            </Estado>
+          </ChartPanel>
+        </section>
+
+        <section className="page__grid page__grid--two">
+          <ChartPanel title="Distribución geográfica de OSC">
+            <MapaMunicipios
+              datos={serieDensidad}
+              cargando={densidad.cargando}
+              error={densidad.error}
+              onReintentar={densidad.recargar}
+              onSeleccionar={alternarMunicipio}
+            />
+          </ChartPanel>
+
+          <ChartPanel title="Municipios con más organizaciones">
+            <Estado
+              cargando={densidad.cargando}
+              error={densidad.error}
+              onReintentar={densidad.recargar}
+              vacio={topDensidad.length === 0}
+              alto={420}
+            >
+              <ResponsiveContainer width="100%" height={420}>
+                <BarChart data={topDensidad} layout="vertical" margin={{ top: 5, right: 24, left: 10, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--color-borde)" horizontal={false} />
+                  <XAxis type="number" tick={{ fontSize: 11, fill: "#6B6259" }} axisLine={false} tickLine={false} allowDecimals={false} />
+                  <YAxis type="category" dataKey="municipio" tick={{ fontSize: 11, fill: "#6B6259" }} width={150} axisLine={false} tickLine={false} />
+                  <Tooltip contentStyle={{ borderRadius: 8, border: "1px solid #E5E1DA", fontSize: 12 }} />
+                  <Bar dataKey="total" name="OSC" fill="#5B87A8" radius={[0, 4, 4, 0]} isAnimationActive={false} />
+                </BarChart>
+              </ResponsiveContainer>
+            </Estado>
+          </ChartPanel>
+        </section>
+
+        <section className="page__grid page__grid--one">
+          <ChartPanel title="Registros nuevos por mes">
+            <Estado
+              cargando={registros.cargando}
+              error={registros.error}
+              onReintentar={registros.recargar}
+              vacio={serieRegistros.length === 0 || sinRegistros}
+              mensajeVacio="El padrón importado no incluye fecha de registro, así que todavía no hay altas que graficar."
+              alto={220}
+            >
+              <ResponsiveContainer width="100%" height={220}>
+                <LineChart data={serieRegistros} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--color-borde)" vertical={false} />
+                  <XAxis dataKey="mes" tick={{ fontSize: 11, fill: "#6B6259" }} axisLine={{ stroke: "var(--color-borde)" }} />
+                  <YAxis tick={{ fontSize: 11, fill: "#6B6259" }} axisLine={false} tickLine={false} allowDecimals={false} />
+                  <Tooltip contentStyle={{ borderRadius: 8, border: "1px solid #E5E1DA", fontSize: 12 }} />
+                  <Line type="monotone" dataKey="registros" name="Registros" stroke="#C2650A" strokeWidth={2.5} dot={{ r: 3 }} isAnimationActive={false} />
+                </LineChart>
               </ResponsiveContainer>
             </Estado>
           </ChartPanel>
