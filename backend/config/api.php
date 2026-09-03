@@ -84,11 +84,20 @@ function responderError(string $mensaje, int $codigo = 400): never
 // Envuelve la lógica del endpoint para que cualquier fallo de SQL salga
 // como JSON 500 en vez de como una página de error de PHP (que rompería
 // el .json() del frontend).
-function ejecutar(callable $logica, array $metodos = ['GET'], bool $publico = false): never
-{
+function ejecutar(
+    callable $logica,
+    array $metodos = ['GET'],
+    bool $publico = false,
+    array $roles = []
+): never {
     iniciarApi($metodos);
     if (!$publico) {
         exigirAutenticacion();
+        // Sin roles indicados basta con estar autenticado: cualquiera que
+        // entró puede leer. Escribir sí se restringe.
+        if ($roles !== []) {
+            exigirRol(...$roles);
+        }
     }
     try {
         responder($logica());

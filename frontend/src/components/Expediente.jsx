@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import { enviarJson, obtenerArchivo, subirArchivo, useApi } from "../api/client";
+import { tieneRol } from "../api/auth";
 import Estado from "./EstadoPanel";
 import VisorArchivo from "./VisorArchivo";
 import "./Expediente.css";
@@ -53,6 +54,9 @@ export default function Expediente({ idOsc }) {
   const [errorSubida, setErrorSubida] = useState(null);
   const inputArchivo = useRef(null);
 
+  // El backend rechaza estas acciones con 403 si el rol no alcanza; aquí solo
+  // se ocultan para no ofrecer botones que van a fallar.
+  const puedeRevisar = tieneRol("admin", "revisor");
   const [viendo, setViendo] = useState(null);
   const [rechazando, setRechazando] = useState(null);
   const [motivo, setMotivo] = useState("");
@@ -111,6 +115,7 @@ export default function Expediente({ idOsc }) {
         <span className="expediente__conteo">{documentos.length}</span>
       </h3>
 
+      {puedeRevisar && (
       <div className="expediente__subir">
         <label className="expediente__campo">
           <span>Tipo de documento</span>
@@ -130,6 +135,7 @@ export default function Expediente({ idOsc }) {
         </label>
         <p className="expediente__ayuda">PDF, JPG o PNG · máximo 10 MB</p>
       </div>
+      )}
 
       {errorSubida && <p className="expediente__error" role="alert">{errorSubida}</p>}
 
@@ -174,12 +180,16 @@ export default function Expediente({ idOsc }) {
                 {d.tiene_archivo && (
                   <button type="button" onClick={() => abrir(d)}>Ver</button>
                 )}
-                <button type="button" className="expediente__aprobar" onClick={() => decidir(d.id_documento, "aprobar")}>
-                  Aprobar
-                </button>
-                <button type="button" className="expediente__rechazar" onClick={() => setRechazando(d.id_documento)}>
-                  Rechazar
-                </button>
+                {puedeRevisar && (
+                  <>
+                    <button type="button" className="expediente__aprobar" onClick={() => decidir(d.id_documento, "aprobar")}>
+                      Aprobar
+                    </button>
+                    <button type="button" className="expediente__rechazar" onClick={() => setRechazando(d.id_documento)}>
+                      Rechazar
+                    </button>
+                  </>
+                )}
               </div>
 
               {rechazando === d.id_documento && (

@@ -127,3 +127,18 @@
   color: var(--color-peligro);
   border-color: var(--color-peligro);
 }
+
+/* Identidad de quien inició sesión: nombre arriba, rol debajo en pequeño. */
+.dash-header__persona {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.25;
+  text-align: right;
+}
+
+.dash-header__rol {
+  font-size: 10.5px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--color-texto-suave);
+}

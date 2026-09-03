@@ -103,3 +103,22 @@
 
 .login__boton:hover:not(:disabled) { background: var(--color-primario-oscuro); }
 .login__boton:disabled { opacity: 0.6; cursor: default; }
+
+/* Acción secundaria dentro de la caja de acceso (por ejemplo, salir cuando el
+   cambio de contraseña es obligatorio). */
+.login__secundario {
+  padding: 8px;
+  font-family: var(--fuente-texto);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-texto-suave);
+  background: transparent;
+  border: 1px solid var(--color-borde);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.login__secundario:hover {
+  color: var(--color-peligro);
+  border-color: var(--color-peligro);
+}

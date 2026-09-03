@@ -72,4 +72,4 @@ ejecutar(function () use ($pdo) {
         'tamano_bytes'   => $meta['tamano_bytes'],
         'estatus'        => 'Pendiente',
     ];
-}, ['POST']);
+}, ['POST'], roles: ['admin', 'revisor']);

@@ -53,20 +53,25 @@ function b64urlDecode(string $texto): string|false
     return base64_decode(strtr($texto, '-_', '+/'), true);
 }
 
-// Crea un token con el usuario y su fecha de expiración, firmado con HMAC.
-function crearToken(string $usuario): array
+// Crea un token con la identidad, el rol y la expiración, firmado con HMAC.
+function crearToken(array $persona): array
 {
     $horas = (int) (env('AUTH_HORAS_VIGENCIA', '12') ?: 12);
     $expira = time() + $horas * 3600;
 
-    $carga = b64url(json_encode(['usuario' => $usuario, 'exp' => $expira], JSON_UNESCAPED_UNICODE));
+    $carga = b64url(json_encode([
+        'id'      => $persona['id'],
+        'usuario' => $persona['usuario'],
+        'rol'     => $persona['rol'],
+        'exp'     => $expira,
+    ], JSON_UNESCAPED_UNICODE));
     $firma = b64url(hash_hmac('sha256', $carga, secretoApp(), true));
 
     return ['token' => "$carga.$firma", 'expira' => $expira];
 }
 
-// Devuelve el usuario si el token es válido, o null si no lo es.
-function verificarToken(string $token): ?string
+// Devuelve la carga del token si es válido, o null si no lo es.
+function verificarToken(string $token): ?array
 {
     $partes = explode('.', $token);
     if (count($partes) !== 2) {
@@ -92,44 +97,102 @@ function verificarToken(string $token): ?string
     if (time() >= (int) $datos['exp']) {
         return null;
     }
-    return (string) $datos['usuario'];
+    return $datos;
 }
 
-// Valida las credenciales contra las variables de entorno.
-function credencialesValidas(string $usuario, string $password): bool
+/**
+ * Valida credenciales y devuelve los datos de la persona, o null.
+ *
+ * Busca primero en la tabla Usuario. Si TODAVÍA no hay ningún usuario, cae a
+ * las variables de entorno: es el modo de arranque, para poder entrar y crear
+ * la primera cuenta sin quedarse fuera del sistema. En cuanto existe un
+ * usuario en la base, ese respaldo deja de funcionar solo.
+ */
+function autenticar(PDO $pdo, string $usuario, string $password): ?array
 {
+    $stmt = $pdo->prepare(
+        'SELECT id_usuario, usuario, nombre, password_hash, rol, activo, debe_cambiar_password
+         FROM Usuario WHERE usuario = :usuario'
+    );
+    $stmt->bindValue(':usuario', $usuario);
+    $stmt->execute();
+    $fila = $stmt->fetch();
+
+    if ($fila) {
+        // Se verifica la contraseña ANTES de mirar si la cuenta está activa,
+        // para que el tiempo de respuesta no delate cuáles cuentas existen.
+        $passwordOk = password_verify($password, $fila['password_hash']);
+        if (!$passwordOk || !$fila['activo']) {
+            return null;
+        }
+
+        $pdo->prepare('UPDATE Usuario SET ultimo_acceso = NOW() WHERE id_usuario = :id')
+            ->execute([':id' => $fila['id_usuario']]);
+
+        return [
+            'id'                    => (int) $fila['id_usuario'],
+            'usuario'               => $fila['usuario'],
+            'nombre'                => $fila['nombre'],
+            'rol'                   => $fila['rol'],
+            'debe_cambiar_password' => (bool) $fila['debe_cambiar_password'],
+        ];
+    }
+
+    // Modo de arranque: solo mientras la tabla esté vacía.
+    if ((int) $pdo->query('SELECT COUNT(*) FROM Usuario')->fetchColumn() > 0) {
+        // Se gasta tiempo comparando de todas formas, para no revelar por
+        // velocidad que el usuario no existe.
+        password_verify($password, '$2y$12$' . str_repeat('.', 53));
+        return null;
+    }
+
     $usuarioEsperado = (string) env('AUTH_USUARIO', '');
     $hash = (string) env('AUTH_PASSWORD_HASH', '');
-
     if ($usuarioEsperado === '' || $hash === '') {
-        error_log('AUTH_USUARIO o AUTH_PASSWORD_HASH no están definidas.');
-        return false;
+        error_log('No hay usuarios en la base y AUTH_USUARIO/AUTH_PASSWORD_HASH no están definidas.');
+        return null;
     }
 
-    // Se verifican ambos SIEMPRE (sin cortocircuito) para que el tiempo de
-    // respuesta no revele si el usuario existe o si falló la contraseña.
-    $usuarioOk = hash_equals($usuarioEsperado, $usuario);
+    $usuarioOk  = hash_equals($usuarioEsperado, $usuario);
     $passwordOk = password_verify($password, $hash);
+    if (!$usuarioOk || !$passwordOk) {
+        return null;
+    }
 
-    return $usuarioOk && $passwordOk;
+    return [
+        'id'                    => null,
+        'usuario'               => $usuarioEsperado,
+        'nombre'                => 'Administrador inicial',
+        'rol'                   => 'admin',
+        'debe_cambiar_password' => false,
+        'arranque'              => true,
+    ];
 }
 
-// Usuario de la sesión en curso, una vez validado el token.
-// Sirve para dejar constancia de quién hizo cada cosa (ver documento-revisar).
+// Identidad de la sesión en curso, una vez validado el token.
+// Devuelve ['id','usuario','nombre','rol'] o null si no hay sesión.
+function sesionActual(?array $identidad = null): ?array
+{
+    static $actual = null;
+    if ($identidad !== null) {
+        $actual = $identidad;
+    }
+    return $actual;
+}
+
+// Atajo para la auditoría: el nombre a mostrar de quien hizo la acción.
 function usuarioDeSesion(): ?string
 {
-    static $usuario = null;
-    if (func_num_args() > 0) {
-        $usuario = func_get_arg(0);
-    }
-    return $usuario;
+    $s = sesionActual();
+    return $s['nombre'] ?? $s['usuario'] ?? null;
 }
 
 // Corta la petición con 401 si no trae un token válido.
 function exigirAutenticacion(): void
 {
     if (!autenticacionHabilitada()) {
-        usuarioDeSesion('desarrollo');
+        sesionActual(['id' => null, 'usuario' => 'desarrollo',
+                      'nombre' => 'Modo desarrollo', 'rol' => 'admin']);
         return;
     }
 
@@ -137,19 +200,73 @@ function exigirAutenticacion(): void
         ?? $_SERVER['REDIRECT_HTTP_AUTHORIZATION']  // Apache con mod_rewrite
         ?? '';
 
-    $usuario = preg_match('/^Bearer\s+(.+)$/i', trim($cabecera), $m)
+    $carga = preg_match('/^Bearer\s+(.+)$/i', trim($cabecera), $m)
         ? verificarToken(trim($m[1]))
         : null;
 
-    if ($usuario === null) {
-        http_response_code(401);
+    if ($carga === null) {
+        rechazar401('Se requiere iniciar sesión para consultar esta información.');
+    }
+
+    // El token es autocontenido, así que seguiría siendo válido aunque la
+    // cuenta se desactive. Se comprueba contra la base en cada petición para
+    // que desactivar a alguien surta efecto de inmediato y no en 12 horas.
+    if ($carga['id'] !== null) {
+        global $pdo;
+        $stmt = $pdo->prepare(
+            'SELECT id_usuario, usuario, nombre, rol, activo FROM Usuario WHERE id_usuario = :id'
+        );
+        $stmt->bindValue(':id', (int) $carga['id'], PDO::PARAM_INT);
+        $stmt->execute();
+        $fila = $stmt->fetch();
+
+        if (!$fila || !$fila['activo']) {
+            rechazar401('Tu cuenta ya no está activa. Contacta al administrador.');
+        }
+
+        // Se toman el rol y el nombre de la base, no del token: si a alguien
+        // se le cambia el rol, el cambio aplica sin esperar a que expire.
+        sesionActual([
+            'id'      => (int) $fila['id_usuario'],
+            'usuario' => $fila['usuario'],
+            'nombre'  => $fila['nombre'],
+            'rol'     => $fila['rol'],
+        ]);
+        return;
+    }
+
+    // Sesión del modo de arranque (sin fila en la base).
+    sesionActual([
+        'id' => null, 'usuario' => $carga['usuario'],
+        'nombre' => 'Administrador inicial', 'rol' => $carga['rol'] ?? 'admin',
+    ]);
+}
+
+function rechazar401(string $mensaje): never
+{
+    http_response_code(401);
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode(['error' => $mensaje], JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
+/**
+ * Corta con 403 si la sesión no tiene alguno de los roles indicados.
+ *
+ * 403 y no 401 a propósito: la persona sí está identificada, simplemente no
+ * le corresponde esa acción. Un 401 la mandaría a iniciar sesión de nuevo sin
+ * resolver nada.
+ */
+function exigirRol(string ...$roles): void
+{
+    $rol = sesionActual()['rol'] ?? null;
+    if ($rol === null || !in_array($rol, $roles, true)) {
+        http_response_code(403);
         header('Content-Type: application/json; charset=utf-8');
         echo json_encode(
-            ['error' => 'Se requiere iniciar sesión para consultar esta información.'],
+            ['error' => 'Tu cuenta no tiene permiso para realizar esta acción.'],
             JSON_UNESCAPED_UNICODE
         );
         exit;
     }
-
-    usuarioDeSesion($usuario);
 }

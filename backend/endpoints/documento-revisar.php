@@ -42,6 +42,7 @@ ejecutar(function () use ($pdo) {
         SET estatus_validacion = :estatus,
             motivo_rechazo     = :motivo,
             revisado_por       = :revisor,
+            revisado_por_id    = :revisor_id,
             fecha_revision     = NOW()
         WHERE id_documento = :id");
     $stmt->bindValue(':estatus', DECISIONES[$decision]);
@@ -49,7 +50,12 @@ ejecutar(function () use ($pdo) {
     // que no quede colgando el de un rechazo anterior.
     $stmt->bindValue(':motivo', $decision === 'rechazar' ? $motivo : null,
                      $decision === 'rechazar' ? PDO::PARAM_STR : PDO::PARAM_NULL);
-    $stmt->bindValue(':revisor', usuarioDeSesion() ?? 'desconocido');
+    // Se guardan las dos cosas: el id para poder enlazar a la cuenta, y el
+    // nombre tal como estaba al revisar, para que el histórico siga siendo
+    // legible aunque después cambie o se desactive la cuenta.
+    $sesion = sesionActual();
+    $stmt->bindValue(':revisor', $sesion['nombre'] ?? 'desconocido');
+    $stmt->bindValue(':revisor_id', $sesion['id'], $sesion['id'] === null ? PDO::PARAM_NULL : PDO::PARAM_INT);
     $stmt->bindValue(':id', (int) $id, PDO::PARAM_INT);
     $stmt->execute();
 
@@ -64,4 +70,4 @@ ejecutar(function () use ($pdo) {
     }
 
     return ['id_documento' => (int) $id, 'estatus' => DECISIONES[$decision]];
-}, ['POST']);
+}, ['POST'], roles: ['admin', 'revisor']);

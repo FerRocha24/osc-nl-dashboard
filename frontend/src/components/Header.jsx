@@ -1,9 +1,20 @@
+import { useState } from "react";
 import { NavLink } from "react-router-dom";
 import ExportButton from "./ExportButton";
-import { cerrarSesion, obtenerUsuario } from "../api/auth";
+import AdminUsuarios from "./AdminUsuarios";
+import CambiarPassword from "./CambiarPassword";
+import { cerrarSesion, obtenerSesion, tieneRol } from "../api/auth";
 import "./Header.css";
 
+const NOMBRE_ROL = {
+  admin: "Administrador",
+  revisor: "Revisor",
+  consulta: "Consulta",
+};
+
 export default function Header({ exportacion }) {
+  const sesion = obtenerSesion();
+  const [panel, setPanel] = useState(null);
   const today = new Date().toLocaleDateString("es-MX", {
     day: "numeric",
     month: "long",
@@ -39,12 +50,28 @@ export default function Header({ exportacion }) {
 
       <div className="dash-header__right">
         <span className="dash-header__date">{today}</span>
-        <span className="dash-header__user">{obtenerUsuario() ?? "Sesión activa"}</span>
+        <div className="dash-header__persona">
+          <span className="dash-header__user">{sesion?.nombre ?? "Sesión activa"}</span>
+          <span className="dash-header__rol">{NOMBRE_ROL[sesion?.rol] ?? ""}</span>
+        </div>
         <ExportButton exportacion={exportacion} />
+        {tieneRol("admin") && (
+          <button type="button" className="dash-header__salir" onClick={() => setPanel("usuarios")}>
+            Usuarios
+          </button>
+        )}
+        <button type="button" className="dash-header__salir" onClick={() => setPanel("password")}>
+          Contraseña
+        </button>
         <button type="button" className="dash-header__salir" onClick={cerrarSesion}>
           Salir
         </button>
       </div>
+
+      {panel === "usuarios" && <AdminUsuarios onCerrar={() => setPanel(null)} />}
+      {panel === "password" && (
+        <CambiarPassword onListo={() => setPanel(null)} />
+      )}
     </header>
   );
 }

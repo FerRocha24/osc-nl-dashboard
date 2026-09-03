@@ -178,6 +178,44 @@ cd database && ./run_imports.sh
 
 ---
 
+## Usuarios del tablero
+
+El acceso ya no es una sola cuenta compartida: hay una tabla `Usuario` con tres
+roles.
+
+| Rol | Puede |
+|---|---|
+| `admin` | Todo, incluyendo crear y desactivar cuentas |
+| `revisor` | Sube documentos y aprueba o rechaza |
+| `consulta` | Solo lectura del tablero |
+
+### Crear la primera cuenta
+
+Mientras la tabla `Usuario` esté vacía, se puede entrar con `AUTH_USUARIO` y
+`AUTH_PASSWORD_HASH` del VirtualHost. Es el **modo de arranque**, y deja de
+funcionar solo en cuanto existe la primera cuenta.
+
+Para crearla, en el servidor:
+
+```bash
+php /var/www/osc-api/deploy/crear-usuario.php
+```
+
+Pide los datos y la contraseña sin mostrarla en pantalla. El mismo script sirve
+para restablecer la contraseña de alguien que la olvidó.
+
+Después, las cuentas se administran desde el tablero (botón **Usuarios**, solo
+visible para administradores).
+
+### Detalles que importan
+
+- Las cuentas **se desactivan, no se borran**: al borrarlas, las revisiones
+  firmadas por esa persona se quedarían sin referencia.
+- Desactivar surte efecto **de inmediato**, no cuando expire su sesión: el rol
+  y el estado se consultan en cada petición.
+- El sistema impide quedarse sin ningún administrador activo.
+- Cada quien debe cambiar su contraseña en el primer ingreso.
+
 ## Migrar al servidor definitivo
 
 Nada de lo que hace funcionar la API depende de AWS. Para llevarla al servidor

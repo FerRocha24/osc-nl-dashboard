@@ -16,19 +16,14 @@ export default function LoginPage() {
     setError(null);
     setEnviando(true);
     try {
+      // Al tener éxito, guardarSesion avisa a App y esta pantalla desaparece.
+      // NO se recarga la página: hacerlo dependería de que el almacenamiento
+      // del navegador sobreviva a la recarga, y donde no lo hace (modo
+      // privado, políticas del sitio) el token recién obtenido se perdía y la
+      // persona quedaba atrapada en un bucle de inicio de sesión sin ver
+      // ningún error. App monta el tablero en un frame aparte, que es lo que
+      // necesitaban las gráficas para medirse bien.
       await iniciarSesion(usuario.trim(), password);
-      // Se recarga en vez de dejar que App intercambie la pantalla por el
-      // tablero. Al hacer el intercambio en un solo commit de React, las
-      // gráficas se montan antes de que el layout tenga sus medidas finales:
-      // el ResponsiveContainer de Recharts mide un ancho de ~80px y no se
-      // recupera después, ni siquiera con un evento de resize.
-      //
-      // Solo pasaba al entrar directo a /estrategica desde el login, pero es
-      // una ruta que alguien puede tener en favoritos. La recarga conserva la
-      // URL y el token (vive en sessionStorage), así que la persona aterriza
-      // donde quería y con todo dibujado.
-      window.location.reload();
-      return;
     } catch (e) {
       setError(e.message);
       setEnviando(false);

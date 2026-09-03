@@ -1,0 +1,202 @@
+.admin__fondo {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(38, 34, 32, 0.4);
+}
+
+.admin {
+  width: min(880px, 100%);
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-superficie);
+  border-radius: var(--radio);
+  overflow: hidden;
+}
+
+.admin__encabezado {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--color-borde);
+}
+
+.admin__encabezado h2 {
+  margin: 0;
+  font-family: var(--fuente-titulos);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-texto);
+}
+
+.admin__encabezado button {
+  width: 30px;
+  height: 30px;
+  font-size: 15px;
+  color: var(--color-texto-suave);
+  background: transparent;
+  border: 1px solid var(--color-borde);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.admin__encabezado button:hover { color: var(--color-peligro); border-color: var(--color-peligro); }
+
+.admin__cuerpo {
+  flex: 1;
+  overflow-y: auto;
+  padding: 18px 20px 24px;
+}
+
+.admin__form {
+  padding: 14px;
+  margin-bottom: 20px;
+  background: var(--color-fondo);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio);
+}
+
+.admin__form h3 {
+  margin: 0 0 12px;
+  font-family: var(--fuente-titulos);
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--color-primario);
+}
+
+.admin__campos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 10px;
+}
+
+.admin__campos label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--color-texto-suave);
+}
+
+.admin__campos input,
+.admin__campos select {
+  padding: 7px 9px;
+  font-family: var(--fuente-texto);
+  font-size: 13px;
+  color: var(--color-texto);
+  background: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: 8px;
+}
+
+.admin__ayuda {
+  margin: 10px 0 0;
+  font-size: 11.5px;
+  line-height: 1.45;
+  color: var(--color-texto-suave);
+}
+
+.admin__form button {
+  margin-top: 12px;
+  padding: 8px 16px;
+  font-family: var(--fuente-texto);
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  background: var(--color-primario);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.admin__form button:hover:not(:disabled) { background: var(--color-primario-oscuro); }
+.admin__form button:disabled { opacity: 0.6; cursor: default; }
+
+.admin__error {
+  margin: 10px 0 0;
+  padding: 8px 11px;
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: var(--color-peligro);
+  background: #FBEDEB;
+  border-radius: 8px;
+}
+
+.admin__tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.admin__tabla th {
+  padding: 8px 10px;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-align: left;
+  color: var(--color-texto-suave);
+  border-bottom: 1px solid var(--color-borde);
+}
+
+.admin__tabla td {
+  padding: 9px 10px;
+  color: var(--color-texto);
+  border-bottom: 1px solid var(--color-borde);
+  vertical-align: middle;
+}
+
+.admin__tabla select {
+  padding: 4px 7px;
+  font-family: var(--fuente-texto);
+  font-size: 12.5px;
+  color: var(--color-texto);
+  background: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: 7px;
+}
+
+.admin__tabla td button {
+  padding: 4px 10px;
+  font-family: var(--fuente-texto);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-texto);
+  background: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: 7px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.admin__tabla td button:hover { border-color: var(--color-texto-suave); }
+
+/* Las cuentas desactivadas se atenúan, pero siguen visibles: son parte del
+   historial de quién tuvo acceso. */
+.admin__inactivo td { opacity: 0.55; }
+
+.admin__tu {
+  font-size: 11.5px;
+  color: var(--color-texto-suave);
+}
+
+.admin__nota {
+  margin: 16px 0 0;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--color-texto-suave);
+}
+
+@media (max-width: 700px) {
+  .admin__tabla { font-size: 12px; }
+  .admin__tabla th, .admin__tabla td { padding: 7px 6px; }
+}

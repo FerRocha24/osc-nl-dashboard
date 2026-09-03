@@ -135,7 +135,12 @@ export async function iniciarSesion(usuario, password) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ usuario, password }),
   });
-  guardarSesion(datos.token, datos.usuario);
+  guardarSesion(datos.token, datos.usuario, {
+    nombre: datos.nombre,
+    rol: datos.rol,
+    debeCambiarPassword: datos.debe_cambiar_password,
+    modoArranque: datos.modo_arranque,
+  });
   return datos;
 }
 
