@@ -1,7 +1,7 @@
 import { useApi } from "../api/client";
 import "./FilterBar.css";
 
-// Las opciones no vienen de mockData: se piden a filtros.php, que las saca de
+// Las opciones se piden a filtros.php, que las saca de
 // los municipios, rubros y categorías que realmente existen en la base.
 //
 // El componente es controlado y configurable: cada vista declara qué campos

@@ -95,7 +95,7 @@ export default function OscTable({
             ? "Sin organizaciones que mostrar"
             : `Mostrando ${desde}–${hasta} de ${total.toLocaleString("es-MX")} organizaciones`}
         </span>
-        <div className="osc-table__pagination-controls">
+        <nav className="osc-table__pagination-controls" aria-label="Paginación del padrón">
           <button
             type="button"
             disabled={pagina <= 1 || cargando}
@@ -108,6 +108,10 @@ export default function OscTable({
               type="button"
               key={n}
               className={n === pagina ? "osc-table__page-active" : undefined}
+              // Un lector de pantalla solo oiría "1", "2", "3" sueltos;
+              // aria-current le dice en cuál está parada la persona.
+              aria-label={`Página ${n}`}
+              aria-current={n === pagina ? "page" : undefined}
               disabled={cargando}
               onClick={() => onCambiarPagina?.(n)}
             >
@@ -121,7 +125,7 @@ export default function OscTable({
           >
             Siguiente
           </button>
-        </div>
+        </nav>
       </div>
     </div>
   );
