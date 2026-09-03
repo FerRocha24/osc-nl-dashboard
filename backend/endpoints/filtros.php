@@ -22,10 +22,20 @@ ejecutar(function () use ($pdo) {
         ORDER BY rubro ASC
     ")->fetchAll(PDO::FETCH_COLUMN);
 
+    // Categorías agrupadas: es lo que filtra la Vista Estratégica, donde un
+    // desplegable de 82 rubros sería inservible.
+    $categoria = SQL_CATEGORIA_RUBRO;
+    $categorias = $pdo->query("
+        SELECT DISTINCT $categoria AS categoria
+        FROM OSC o
+        ORDER BY categoria ASC
+    ")->fetchAll(PDO::FETCH_COLUMN);
+
     return [
         // "Todos" va primero porque es la opción por defecto del FilterBar
-        'municipios' => array_merge(['Todos'], $municipios),
-        'rubros'     => array_merge(['Todos'], $rubros),
-        'estatus'    => ['Todos', 'Completo', 'Pendiente', 'Vencido'],
+        'municipios'  => array_merge(['Todos'], $municipios),
+        'rubros'      => array_merge(['Todos'], $rubros),
+        'categorias'  => array_merge(['Todos'], $categorias),
+        'estatus'     => ['Todos', 'Completo', 'Pendiente', 'Vencido'],
     ];
 });

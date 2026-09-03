@@ -6,13 +6,19 @@ import { cerrarSesion, guardarSesion, obtenerToken } from "./auth";
 
 // La URL base viene del .env de Vite (VITE_API_URL). Se le quita la diagonal
 // final para poder concatenar rutas sin generar "//" en medio.
-const URL_BASE = (import.meta.env.VITE_API_URL ?? "http://localhost:8000").replace(/\/+$/, "");
+//
+// Si viene vacía se usan rutas del mismo origen: en desarrollo el proxy de
+// Vite (ver vite.config.js) las reenvía al PHP de localhost:8000, lo que
+// evita el CORS por completo. En producción SIEMPRE debe estar definida,
+// porque el frontend (Vercel) y el backend (EC2) están en dominios distintos.
+const URL_BASE = (import.meta.env.VITE_API_URL ?? "").replace(/\/+$/, "");
 
 // Construye la URL de un endpoint con sus parámetros de query string.
 // Los parámetros vacíos, nulos o en "Todos" se omiten, que es justo lo que
 // el backend interpreta como "sin filtro".
 function construirUrl(endpoint, params = {}) {
-  const url = new URL(`${URL_BASE}/endpoints/${endpoint}`);
+  const base = URL_BASE || window.location.origin;
+  const url = new URL(`${base}/endpoints/${endpoint}`);
   for (const [clave, valor] of Object.entries(params)) {
     if (valor === null || valor === undefined || valor === "" || valor === "Todos") continue;
     url.searchParams.set(clave, valor);
@@ -42,7 +48,7 @@ export async function pedirJson(endpoint, params = {}, señal, opciones = {}) {
     // no le sirve a nadie del Registro y solo confunde.
     throw new Error(
       import.meta.env.DEV
-        ? `No se pudo conectar con el backend en ${URL_BASE}. ` +
+        ? `No se pudo conectar con el backend (${URL_BASE || "proxy de Vite → localhost:8000"}). ` +
           `¿Está corriendo?  cd backend && PHP_CLI_SERVER_WORKERS=6 php -S localhost:8000`
         : "No se pudo conectar con el servidor. " +
           "Revisa tu conexión o inténtalo de nuevo en unos minutos."

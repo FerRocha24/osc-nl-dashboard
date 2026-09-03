@@ -1,0 +1,214 @@
+.detalle__fondo {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  justify-content: flex-end;
+  background: rgba(38, 34, 32, 0.35);
+}
+
+.detalle {
+  width: min(560px, 100%);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-superficie);
+  border-left: 1px solid var(--color-borde);
+  box-shadow: -8px 0 28px rgba(38, 34, 32, 0.12);
+  animation: detalle-entrar 0.18s ease-out;
+}
+
+@keyframes detalle-entrar {
+  from { transform: translateX(24px); opacity: 0; }
+  to   { transform: translateX(0); opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .detalle { animation: none; }
+}
+
+.detalle__encabezado {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 22px 14px;
+  border-bottom: 1px solid var(--color-borde);
+}
+
+.detalle__folio {
+  margin: 0 0 3px;
+  font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--color-texto-suave);
+}
+
+.detalle__titulo {
+  margin: 0;
+  font-family: var(--fuente-titulos);
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--color-texto);
+}
+
+.detalle__cerrar {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  font-size: 15px;
+  color: var(--color-texto-suave);
+  background: transparent;
+  border: 1px solid var(--color-borde);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.detalle__cerrar:hover {
+  color: var(--color-peligro);
+  border-color: var(--color-peligro);
+}
+
+.detalle__cuerpo {
+  flex: 1;
+  overflow-y: auto;
+  padding: 4px 22px 28px;
+}
+
+.detalle__seccion {
+  padding: 18px 0;
+  border-bottom: 1px solid var(--color-borde);
+}
+
+.detalle__seccion:last-child { border-bottom: none; }
+
+.detalle__seccion h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 12px;
+  font-family: var(--fuente-titulos);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--color-primario);
+}
+
+.detalle__conteo {
+  padding: 1px 7px;
+  font-family: var(--fuente-texto);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-texto-suave);
+  background: var(--color-fondo);
+  border: 1px solid var(--color-borde);
+  border-radius: 20px;
+}
+
+.detalle__lista { margin: 0; }
+
+.detalle__campo {
+  display: grid;
+  grid-template-columns: 130px 1fr;
+  gap: 10px;
+  padding: 5px 0;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.detalle__campo dt {
+  color: var(--color-texto-suave);
+}
+
+.detalle__campo dd {
+  margin: 0;
+  color: var(--color-texto);
+  overflow-wrap: anywhere;
+}
+
+.detalle__correos {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.detalle__correos a { color: var(--color-azul); }
+
+.detalle__subtitulo {
+  margin: 10px 0 3px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-texto-suave);
+}
+
+.detalle__texto {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--color-texto);
+}
+
+.detalle__vacio {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--color-texto-suave);
+}
+
+.detalle__apoyos {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.detalle__apoyo {
+  padding: 11px 13px;
+  background: var(--color-fondo);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio);
+}
+
+.detalle__apoyo-encabezado {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 5px;
+}
+
+.detalle__anio {
+  padding: 1px 7px;
+  font-size: 11.5px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: #fff;
+  background: var(--color-primario);
+  border-radius: 20px;
+}
+
+.detalle__tipo {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-texto);
+}
+
+.detalle__poblacion {
+  margin: 0 0 5px;
+  font-size: 12px;
+  color: var(--color-texto-suave);
+}
+
+/* En pantallas chicas ocupa todo y las etiquetas van encima del valor. */
+@media (max-width: 640px) {
+  .detalle { width: 100%; border-left: none; }
+  .detalle__campo { grid-template-columns: 1fr; gap: 2px; }
+}
+
+@media print {
+  .detalle__fondo { display: none !important; }
+}

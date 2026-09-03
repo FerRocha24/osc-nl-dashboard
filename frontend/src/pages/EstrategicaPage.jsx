@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend,
   BarChart, Bar, XAxis, YAxis, CartesianGrid,
@@ -10,23 +11,32 @@ import Estado from "../components/EstadoPanel";
 import { useApi } from "../api/client";
 import "./Pages.css";
 
-const RUBRO_COLORS = ["#C2650A", "#6E6EC2", "#3FA383", "#B23D74", "#5B87A8", "#D98E04", "#9C5108"];
+// Nueve colores para las nueve categorías: con siete, dos rebanadas de la dona
+// saldrían del mismo color y parecerían la misma categoría.
+const RUBRO_COLORS = [
+  "#C2650A", "#6E6EC2", "#3FA383", "#B23D74", "#5B87A8",
+  "#D98E04", "#9C5108", "#7A8C4A", "#6B6259",
+];
 
-// El padrón real trae 83 rubros distintos; en una dona solo caben unos
-// cuantos antes de volverse ilegible, así que se muestran los principales.
-const RUBROS_EN_GRAFICA = 7;
+const FILTROS_INICIALES = { municipio: "Todos", categoria: "Todos" };
 
 export default function EstrategicaPage() {
-  const kpis = useApi("kpis-estrategicos.php");
-  const rubros = useApi("distribucion-rubro.php", { limite: RUBROS_EN_GRAFICA }, []);
+  const [filtros, setFiltros] = useState(FILTROS_INICIALES);
+
+  // Todos los paneles comparten el mismo filtro, así que la vista completa
+  // habla del mismo subconjunto del padrón.
+  const kpis = useApi("kpis-estrategicos.php", filtros);
+  // Sin `limite`: el backend agrupa los 82 rubros en 9 categorías, así que
+  // caben todas en la dona sin recortar nada.
+  const rubros = useApi("distribucion-rubro.php", filtros, []);
   // Se dejaron de usar fuentes-financiamiento.php y beneficiarios-por-edad.php:
   // sus tablas están vacías y no hay CSV que las alimente. En su lugar estos
   // dos paneles muestran el historial de inversión social, que sí tiene datos
   // reales (598 apoyos de 2023-2024). Los endpoints siguen existiendo para
   // cuando el socio formador entregue esa información.
-  const apoyosTipo = useApi("apoyos-por-tipo.php", {}, []);
-  const apoyosPoblacion = useApi("apoyos-por-poblacion.php", { limite: 8 }, []);
-  const kpisApoyos = useApi("kpis-apoyos.php");
+  const apoyosTipo = useApi("apoyos-por-tipo.php", filtros, []);
+  const apoyosPoblacion = useApi("apoyos-por-poblacion.php", { ...filtros, limite: 8 }, []);
+  const kpisApoyos = useApi("kpis-apoyos.php", filtros);
 
   const serieRubros = rubros.datos ?? [];
   const serieTipo = apoyosTipo.datos ?? [];
@@ -70,9 +80,12 @@ export default function EstrategicaPage() {
   return (
     <div className="page">
       <Header exportacion={exportacion} />
-      {/* Sin conectar: los endpoints de esta vista agregan sobre todo el
-          padrón y todavía no aceptan filtros por municipio o rubro. */}
-      <FilterBar deshabilitado />
+      <FilterBar
+        campos={["municipio", "categoria"]}
+        valores={filtros}
+        onChange={setFiltros}
+        mostrarFechas={false}
+      />
 
       <main className="page__content">
         <section className="page__bignumbers">
@@ -103,7 +116,7 @@ export default function EstrategicaPage() {
         </section>
 
         <section className="page__grid page__grid--two">
-          <ChartPanel title={`Distribución de OSC por Rubro (top ${RUBROS_EN_GRAFICA})`}>
+          <ChartPanel title="Distribución de OSC por categoría">
             <Estado
               cargando={rubros.cargando}
               error={rubros.error}

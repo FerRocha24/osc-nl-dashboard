@@ -14,6 +14,11 @@ ejecutar(function () use ($pdo) {
     $limite    = parametroEntero('limite', 10, 1, 50);
     $poblacion = SQL_POBLACION_NORMALIZADA;
 
+    [$where, $params] = filtrosOsc();
+    $where = $where === ''
+        ? "WHERE a.poblacion IS NOT NULL AND TRIM(a.poblacion) <> ''"
+        : "$where AND a.poblacion IS NOT NULL AND TRIM(a.poblacion) <> ''";
+
     // Se repite la expresión completa en GROUP BY / ORDER BY en vez de usar el
     // alias: MySQL resuelve un alias que choca con el nombre de una columna
     // real a favor de la COLUMNA, así que "GROUP BY poblacion" agruparía por
@@ -26,12 +31,15 @@ ejecutar(function () use ($pdo) {
             SUM(a.anio = 2023) AS anio_2023,
             SUM(a.anio = 2024) AS anio_2024
         FROM Apoyos a
-        WHERE a.poblacion IS NOT NULL AND TRIM(a.poblacion) <> ''
+        INNER JOIN OSC o ON o.id_osc = a.id_osc
+        LEFT JOIN Municipio m ON m.id_municipio = o.id_municipio
+        $where
         GROUP BY $poblacion
         ORDER BY total DESC, $poblacion ASC
         LIMIT :limite";
 
     $stmt = $pdo->prepare($sql);
+    foreach ($params as $c => $v) { $stmt->bindValue($c, $v, PDO::PARAM_STR); }
     $stmt->bindValue(':limite', $limite, PDO::PARAM_INT);
     $stmt->execute();
 

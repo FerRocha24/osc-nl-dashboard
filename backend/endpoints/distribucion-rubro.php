@@ -1,26 +1,44 @@
 <?php
 // GET /endpoints/distribucion-rubro.php
-// Conteo de OSC agrupado por rubro, para la gráfica de dona de la
-// Vista Estratégica. Ordenado de mayor a menor.
+// Conteo de OSC por rubro, para la gráfica de dona de la Vista Estratégica.
 //
-//   ?limite=10   cuántos rubros devolver como máximo (1–100, por defecto todos)
+//   ?detalle=1          devuelve los 82 rubros específicos en vez de categorías
+//   ?limite=10          máximo de filas (1-100)
+//   ?municipio=...      filtra por municipio
+//   ?categoria=...      filtra por categoría de rubro
+//
+// Por defecto agrupa en las 9 categorías de SQL_CATEGORIA_RUBRO. El padrón
+// solo trae el rubro específico, y 82 rebanadas no comunican nada; con el
+// detalle se puede seguir consultando el desglose fino.
 
 require_once __DIR__ . '/../config/api.php';
 
 ejecutar(function () use ($pdo) {
-    $limite = parametroEntero('limite', 100, 1, 100);
+    $detalle = ($_GET['detalle'] ?? '') === '1';
+    $limite  = parametroEntero('limite', 100, 1, 100);
 
-    // Las OSC sin rubro capturado se agrupan bajo "Sin clasificar" en lugar
-    // de desaparecer del total.
+    // Se repite la expresión en GROUP BY en vez de usar el alias: si el alias
+    // choca con el nombre de una columna real, MySQL agrupa por la columna.
+    $agrupador = $detalle
+        ? "COALESCE(NULLIF(TRIM(o.rubro), ''), 'Sin clasificar')"
+        : SQL_CATEGORIA_RUBRO;
+
+    [$where, $params] = filtrosOsc();
+
     $sql = "
-        SELECT COALESCE(NULLIF(TRIM(o.rubro), ''), 'Sin clasificar') AS rubro,
-               COUNT(*) AS total
+        SELECT $agrupador AS rubro,
+               COUNT(*)   AS total
         FROM OSC o
-        GROUP BY rubro
+        LEFT JOIN Municipio m ON m.id_municipio = o.id_municipio
+        $where
+        GROUP BY $agrupador
         ORDER BY total DESC, rubro ASC
         LIMIT :limite";
 
     $stmt = $pdo->prepare($sql);
+    foreach ($params as $clave => $valor) {
+        $stmt->bindValue($clave, $valor, PDO::PARAM_STR);
+    }
     $stmt->bindValue(':limite', $limite, PDO::PARAM_INT);
     $stmt->execute();
 

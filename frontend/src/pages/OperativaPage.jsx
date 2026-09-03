@@ -9,6 +9,7 @@ import { AlertRing, AlertBar, AlertNumber } from "../components/AlertCard";
 import OscTable from "../components/OscTable";
 import ChartPanel from "../components/ChartPanel";
 import Estado from "../components/EstadoPanel";
+import OscDetalle from "../components/OscDetalle";
 import { pedirJson, useApi } from "../api/client";
 import "./Pages.css";
 
@@ -18,6 +19,8 @@ const POR_PAGINA = 10;
 export default function OperativaPage() {
   const [filtros, setFiltros] = useState(FILTROS_INICIALES);
   const [pagina, setPagina] = useState(1);
+  // id de la OSC cuya ficha está abierta; null = panel cerrado
+  const [oscSeleccionada, setOscSeleccionada] = useState(null);
 
   // Al cambiar un filtro se vuelve a la primera página: quedarse en la 8 tras
   // filtrar a 12 resultados dejaría la tabla vacía sin explicación.
@@ -103,6 +106,7 @@ export default function OperativaPage() {
           error={padron.error}
           onReintentar={padron.recargar}
           onCambiarPagina={setPagina}
+          onSeleccionar={setOscSeleccionada}
         />
 
         <section className="page__grid page__grid--two">
@@ -146,6 +150,10 @@ export default function OperativaPage() {
           </ChartPanel>
         </section>
       </main>
+
+      {oscSeleccionada !== null && (
+        <OscDetalle idOsc={oscSeleccionada} onCerrar={() => setOscSeleccionada(null)} />
+      )}
     </div>
   );
 }

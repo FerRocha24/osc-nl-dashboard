@@ -102,3 +102,80 @@ const SQL_TIPO_APOYO_ETIQUETA =
     "TRIM(SUBSTRING(a.tipo_apoyo, LOCATE('.', a.tipo_apoyo) + 1))";
 const SQL_TIPO_APOYO_ORDEN =
     "CAST(SUBSTRING_INDEX(a.tipo_apoyo, '.', 1) AS UNSIGNED)";
+
+// --- SUPUESTO 8: agrupación de rubros en categorías -----------------------
+// El padrón trae 82 valores distintos en `rubro`, porque el CSV solo tiene el
+// "Rubro Específico" y no una categoría general (ver CONTEXTO_PARA_CLAUDE_CODE).
+// Una gráfica con 82 rebanadas no comunica nada, y mostrar solo el "top 7"
+// esconde a la mitad del padrón.
+//
+// Esta agrupación la propuso el equipo de desarrollo a partir de los nombres,
+// NO viene del socio formador. **Debe validarse con ellos** antes de usarla en
+// un reporte oficial. Cambiarla es editar solo este bloque.
+//
+// "Generales" (71 organizaciones) y "Seleccione Rubro Especifico" (4) no son
+// rubros: son el valor por defecto del formulario de captura. Se agrupan como
+// "Sin clasificar" para que se vea el tamaño real del problema de captura en
+// lugar de disimularlo.
+const SQL_CATEGORIA_RUBRO = "
+    CASE
+        WHEN o.rubro IS NULL OR TRIM(o.rubro) = '' THEN 'Sin clasificar'
+        WHEN TRIM(o.rubro) IN (
+            'Generales', 'Otros', 'Seleccione Rubro Especifico'
+        ) THEN 'Sin clasificar'
+        WHEN TRIM(o.rubro) IN (
+            'Educación', 'Formación y educación', 'Educación especial',
+            'Capacitación General', 'Formación y valores', 'Becas',
+            'Capacitación', 'Capacitación y proyectos productivos',
+            'Albergues educativos', 'Educación y formación',
+            'Otros-Comedor, Educación y Formación'
+        ) THEN 'Educación y formación'
+        WHEN TRIM(o.rubro) IN (
+            'Enfermedades especificas', 'Alcohol y drogas', 'Servicios médicos',
+            'Enfermedades mentales', 'Adicciones', 'Alcohol', 'Drogas',
+            'Prevención de enfermedades', 'Prevención', 'Enfermos',
+            'Rehabilitación juvenil'
+        ) THEN 'Salud y adicciones'
+        WHEN TRIM(o.rubro) IN (
+            'Neuromotora', 'Ciegos y débiles visuales', 'Audición y lenguaje',
+            'Intelectual', 'Discapacidad neuromotora',
+            'Discapacidad auditiva y de lenguaje', 'Discapacidad Intelectual',
+            'Discapacidad visual'
+        ) THEN 'Discapacidad'
+        WHEN TRIM(o.rubro) IN (
+            'Comedores', 'Casa hogar', 'Casa de reposo',
+            'Distribución de despensas', 'Despensas', 'Albergues',
+            'Asistencia Social', 'Atención social', 'Atención y cuidado',
+            'Atenciones y Cuidados', 'Otros asistenciales', 'Temporales',
+            'Centro de Asistencia Social (Ley General de Derechos de Niñas, Niños y Adolescentes)',
+            'Centro de Asistencia Social Temporales(Ley General de Derechos de Niñas, Niños y Adolescentes)',
+            'Otros-Albergue', 'Otros-Brigadas de Asistencia Social',
+            'Personas adultas mayores: atención y cuidados',
+            'Personas adultas mayores: casa de reposo',
+            'Guarderías', 'Familia', 'Emergencias',
+            'Participación en acciones de protección civil'
+        ) THEN 'Asistencia social y alimentaria'
+        WHEN TRIM(o.rubro) IN (
+            'Derechos humanos', 'Género', 'Derechos sexuales',
+            'Atención a mujeres', 'Violencia familiar', 'Violencia de género',
+            'Violencia', 'Jurídico'
+        ) THEN 'Derechos humanos y género'
+        WHEN TRIM(o.rubro) IN (
+            'Fortalecedoras del sector social',
+            'Prestación de servicios no lucrativos para la creación y fortalecimiento de organizaciones',
+            'Actividad cívica enfocada a promover la participación ciudadana en asuntos de interes público',
+            'Actividad cívica enfocada', 'Voluntariado', 'Clubes',
+            'Instituciones de Servicio a la Comunidad', 'Donativos',
+            'Causas y actividades', 'Deportes'
+        ) THEN 'Fortalecimiento y participación'
+        WHEN TRIM(o.rubro) IN (
+            'Proyectos productivos', 'Desarrollo', 'Orientación',
+            'Orientación social'
+        ) THEN 'Desarrollo y proyectos productivos'
+        WHEN TRIM(o.rubro) IN (
+            'Niños, Adolescentes y jóvenes', 'Personas migrantes',
+            'Otros-Migrantes', 'Personas privadas de su libertad',
+            'Personas indígenas'
+        ) THEN 'Grupos en situación de vulnerabilidad'
+        ELSE 'Sin clasificar'
+    END";

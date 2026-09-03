@@ -24,7 +24,7 @@ function formatearFecha(valor) {
 
 export default function OscTable({
   osc = [], total = 0, pagina = 1, limite = 10,
-  cargando, error, onReintentar, onCambiarPagina,
+  cargando, error, onReintentar, onCambiarPagina, onSeleccionar,
 }) {
   const totalPaginas = Math.max(1, Math.ceil(total / limite));
   const desde = total === 0 ? 0 : (pagina - 1) * limite + 1;
@@ -61,7 +61,22 @@ export default function OscTable({
           </thead>
           <tbody>
             {osc.map((row) => (
-              <tr key={row.id_osc}>
+              // La fila entera abre la ficha. Se usa tabIndex y onKeyDown para
+              // que también funcione con el teclado, no solo con el ratón.
+              <tr
+                key={row.id_osc}
+                className="osc-table__fila--clic"
+                tabIndex={0}
+                role="button"
+                aria-label={`Ver ficha de ${row.razon_social}`}
+                onClick={() => onSeleccionar?.(row.id_osc)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    onSeleccionar?.(row.id_osc);
+                  }
+                }}
+              >
                 <td className="osc-table__folio">{row.no_registro ?? "—"}</td>
                 <td className="osc-table__razon">{row.razon_social}</td>
                 <td>{row.municipio ?? "—"}</td>

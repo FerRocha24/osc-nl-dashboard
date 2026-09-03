@@ -1,69 +1,96 @@
 import { useApi } from "../api/client";
 import "./FilterBar.css";
 
-// Las opciones ya no vienen de mockData: se piden a filtros.php, que las
-// saca de los municipios y rubros que realmente existen en la base.
+// Las opciones no vienen de mockData: se piden a filtros.php, que las saca de
+// los municipios, rubros y categorías que realmente existen en la base.
 //
-// El componente es controlado: recibe los valores y avisa de los cambios,
-// para que la página dueña de los datos vuelva a pedir la lista filtrada.
-// Si no se le pasa `onChange` se comporta como antes (solo decorativo).
+// El componente es controlado y configurable: cada vista declara qué campos
+// necesita. La Operativa filtra el padrón (municipio, rubro, estatus); la
+// Estratégica filtra agregados, donde el rubro específico y el estatus
+// documental no significan nada, pero la categoría sí.
 
 const OPCIONES_INICIALES = {
   municipios: ["Todos"],
   rubros: ["Todos"],
+  categorias: ["Todos"],
   estatus: ["Todos", "Completo", "Pendiente", "Vencido"],
 };
 
-export default function FilterBar({ valores, onChange, deshabilitado = false }) {
+const CAMPOS = {
+  municipio: { etiqueta: "Municipio", lista: (o) => o.municipios },
+  rubro:     { etiqueta: "Rubro", lista: (o) => o.rubros },
+  categoria: { etiqueta: "Categoría", lista: (o) => o.categorias },
+  estatus:   { etiqueta: "Estatus", lista: (o) => o.estatus },
+};
+
+export default function FilterBar({
+  campos = ["municipio", "rubro", "estatus"],
+  valores,
+  onChange,
+  mostrarFechas = true,
+}) {
   const { datos, cargando } = useApi("filtros.php", {}, OPCIONES_INICIALES);
   const opciones = datos ?? OPCIONES_INICIALES;
 
   const esControlado = typeof onChange === "function";
-  const bloqueado = deshabilitado || cargando;
 
   const cambiar = (campo) => (evento) => {
     if (esControlado) onChange({ ...valores, [campo]: evento.target.value });
   };
 
-  const grupos = [
-    { campo: "municipio", etiqueta: "Municipio", lista: opciones.municipios },
-    { campo: "rubro", etiqueta: "Rubro", lista: opciones.rubros },
-    { campo: "estatus", etiqueta: "Estatus", lista: opciones.estatus },
-  ];
+  const limpiar = () => {
+    if (!esControlado) return;
+    onChange(Object.fromEntries(campos.map((c) => [c, "Todos"])));
+  };
+
+  const hayFiltros = campos.some((c) => (valores?.[c] ?? "Todos") !== "Todos");
 
   return (
     <div className="filter-bar">
-      {grupos.map(({ campo, etiqueta, lista }) => (
-        <div className="filter-bar__group" key={campo}>
-          <label className="filter-bar__label" htmlFor={`filtro-${campo}`}>
-            {etiqueta}
-          </label>
-          <select
-            id={`filtro-${campo}`}
-            className="filter-bar__select"
-            disabled={bloqueado}
-            {...(esControlado
-              ? { value: valores?.[campo] ?? "Todos", onChange: cambiar(campo) }
-              : { defaultValue: "Todos" })}
-          >
-            {lista.map((opcion) => (
-              <option key={opcion} value={opcion}>{opcion}</option>
-            ))}
+      {campos.map((campo) => {
+        const def = CAMPOS[campo];
+        if (!def) return null;
+        const lista = def.lista(opciones) ?? ["Todos"];
+        return (
+          <div className="filter-bar__group" key={campo}>
+            <label className="filter-bar__label" htmlFor={`filtro-${campo}`}>
+              {def.etiqueta}
+            </label>
+            <select
+              id={`filtro-${campo}`}
+              className="filter-bar__select"
+              disabled={cargando}
+              {...(esControlado
+                ? { value: valores?.[campo] ?? "Todos", onChange: cambiar(campo) }
+                : { defaultValue: "Todos" })}
+            >
+              {lista.map((opcion) => (
+                <option key={opcion} value={opcion}>{opcion}</option>
+              ))}
+            </select>
+          </div>
+        );
+      })}
+
+      {mostrarFechas && (
+        <div className="filter-bar__group">
+          <label className="filter-bar__label" htmlFor="filtro-fechas">Rango de fechas</label>
+          {/* Sin conectar: las 779 OSC importadas traen fecha_registro en NULL,
+              así que filtrar por fecha no devolvería nada todavía. */}
+          <select id="filtro-fechas" className="filter-bar__select" defaultValue="Últimos 12 meses" disabled>
+            <option>Últimos 30 días</option>
+            <option>Últimos 3 meses</option>
+            <option>Últimos 12 meses</option>
+            <option>Año en curso</option>
           </select>
         </div>
-      ))}
+      )}
 
-      <div className="filter-bar__group">
-        <label className="filter-bar__label" htmlFor="filtro-fechas">Rango de fechas</label>
-        {/* Sin conectar: las 779 OSC importadas traen fecha_registro en NULL,
-            así que filtrar por fecha no devolvería nada todavía. */}
-        <select id="filtro-fechas" className="filter-bar__select" defaultValue="Últimos 12 meses" disabled>
-          <option>Últimos 30 días</option>
-          <option>Últimos 3 meses</option>
-          <option>Últimos 12 meses</option>
-          <option>Año en curso</option>
-        </select>
-      </div>
+      {esControlado && hayFiltros && (
+        <button type="button" className="filter-bar__limpiar" onClick={limpiar}>
+          Limpiar filtros
+        </button>
+      )}
     </div>
   );
 }

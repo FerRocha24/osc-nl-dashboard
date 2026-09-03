@@ -12,6 +12,13 @@ ejecutar(function () use ($pdo) {
     $etiqueta = SQL_TIPO_APOYO_ETIQUETA;
     $orden    = SQL_TIPO_APOYO_ORDEN;
 
+    // INNER JOIN a OSC: los 2 apoyos que no se emparejaron quedan fuera al
+    // filtrar, porque no se sabe a qué municipio ni categoría pertenecen.
+    [$where, $params] = filtrosOsc();
+    $where = $where === ''
+        ? "WHERE a.tipo_apoyo IS NOT NULL AND TRIM(a.tipo_apoyo) <> ''"
+        : "$where AND a.tipo_apoyo IS NOT NULL AND TRIM(a.tipo_apoyo) <> ''";
+
     $sql = "
         SELECT
             $etiqueta          AS tipo,
@@ -20,7 +27,9 @@ ejecutar(function () use ($pdo) {
             SUM(a.anio = 2023) AS anio_2023,
             SUM(a.anio = 2024) AS anio_2024
         FROM Apoyos a
-        WHERE a.tipo_apoyo IS NOT NULL AND TRIM(a.tipo_apoyo) <> ''
+        INNER JOIN OSC o ON o.id_osc = a.id_osc
+        LEFT JOIN Municipio m ON m.id_municipio = o.id_municipio
+        $where
         GROUP BY a.tipo_apoyo
         ORDER BY $orden ASC";
 
@@ -30,5 +39,10 @@ ejecutar(function () use ($pdo) {
         'total'         => (int) $f['total'],
         'anio_2023'     => (int) $f['anio_2023'],
         'anio_2024'     => (int) $f['anio_2024'],
-    ], $pdo->query($sql)->fetchAll());
+    ], (function () use ($pdo, $sql, $params) {
+        $stmt = $pdo->prepare($sql);
+        foreach ($params as $c => $v) { $stmt->bindValue($c, $v, PDO::PARAM_STR); }
+        $stmt->execute();
+        return $stmt->fetchAll();
+    })());
 });

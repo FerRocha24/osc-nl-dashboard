@@ -123,6 +123,39 @@ function parametroEntero(string $nombre, int $porDefecto, int $min, int $max): i
     return max($min, min($max, (int) trim($valor)));
 }
 
+/**
+ * Construye el WHERE compartido por los endpoints agregados de la Vista
+ * Estratégica, a partir de los filtros de municipio y categoría de rubro.
+ *
+ * Devuelve [fragmentoSql, parametros]. El fragmento incluye el JOIN implícito
+ * por id_municipio, así que quien lo use debe tener `OSC o` en el FROM y hacer
+ * LEFT JOIN a Municipio como `m`.
+ */
+function filtrosOsc(): array
+{
+    $condiciones = [];
+    $params      = [];
+
+    $municipio = parametro('municipio');
+    if ($municipio !== null) {
+        $condiciones[] = 'm.nombre_municipio = :municipio';
+        $params[':municipio'] = $municipio;
+    }
+
+    // Se filtra por la CATEGORÍA, no por el rubro específico: es lo que se ve
+    // en la gráfica y lo que tiene sentido como filtro de una vista global.
+    $categoria = parametro('categoria');
+    if ($categoria !== null) {
+        $condiciones[] = SQL_CATEGORIA_RUBRO . ' = :categoria';
+        $params[':categoria'] = $categoria;
+    }
+
+    return [
+        $condiciones ? 'WHERE ' . implode(' AND ', $condiciones) : '',
+        $params,
+    ];
+}
+
 // Convierte a número los campos que MySQL entrega como string vía PDO,
 // para que el frontend (Recharts) reciba números y no cadenas.
 function aNumero(mixed $valor, bool $entero = false): int|float|null
