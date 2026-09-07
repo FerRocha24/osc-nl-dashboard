@@ -85,6 +85,12 @@ export default function OscDetalle({ idOsc, onCerrar }) {
                     <Campo etiqueta="RFC">{osc.rfc}</Campo>
                     <Campo etiqueta="Fecha de registro">{formatearFecha(osc.fecha_registro)}</Campo>
                     <Campo etiqueta="Estatus documental">{osc.estatus_documental}</Campo>
+                    <Campo etiqueta="Operación">{osc.estatus_operacion}</Campo>
+                    <Campo etiqueta="Observaciones">{osc.observaciones_estatus}</Campo>
+                    <Campo etiqueta="Última visita">
+                      {formatearFecha(osc.ultima_fecha_visita)}
+                    </Campo>
+                    <Campo etiqueta="Nota de la visita">{osc.ultima_visita_observacion}</Campo>
                   </dl>
                 </section>
 

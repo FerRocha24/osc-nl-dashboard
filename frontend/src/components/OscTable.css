@@ -48,6 +48,8 @@
   border-radius: 20px;
   font-size: 11px;
   font-weight: 600;
+  /* Una etiqueta partida en dos renglones descuadra la altura de la fila. */
+  white-space: nowrap;
 }
 
 .status-badge--verde {

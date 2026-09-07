@@ -7,6 +7,7 @@
 //   ?rubro=Salud y bienestar rubro exacto
 //   ?estatus=Vencido         estatus documental (Completo|Pendiente|Vencido|Rechazado)
 //   ?resolucion=Denegada     resolución del Registro (Pendiente|Aceptada|Denegada)
+//   ?operacion=Baja          estatus de operación del padrón de la Secretaría
 //   ?q=manos                 búsqueda parcial en razón social, siglas o RFC
 //   ?limite=100&pagina=1     paginación (limite máx. 500)
 //
@@ -20,6 +21,7 @@ ejecutar(function () use ($pdo) {
     $rubro     = parametro('rubro');
     $estatus   = parametro('estatus');
     $resolucion = parametro('resolucion');
+    $operacion  = parametro('operacion');
     $busqueda  = parametro('q');
 
     $limite  = parametroEntero('limite', 100, 1, 500);
@@ -46,6 +48,15 @@ ejecutar(function () use ($pdo) {
         }
         $condiciones[] = 'o.estatus_revision = :resolucion';
         $params[':resolucion'] = $resolucion;
+    }
+    // Estatus de operación tal como viene del padrón. Es columna de OSC, no un
+    // agregado, así que va en el WHERE.
+    if ($operacion !== null) {
+        if (!in_array($operacion, ESTATUS_OPERACION, true)) {
+            responderError("El parámetro 'operacion' no es un estatus válido del padrón.", 422);
+        }
+        $condiciones[] = 'o.estatus_operacion = :operacion';
+        $params[':operacion'] = $operacion;
     }
     if ($busqueda !== null) {
         // Se usan tres marcadores distintos (no :q repetido) porque con
@@ -97,6 +108,7 @@ ejecutar(function () use ($pdo) {
             o.actividad_principal,
             m.nombre_municipio AS municipio,
             o.estatus_revision,
+            o.estatus_operacion,
             o.fecha_registro,
             o.fecha_ultima_publicacion_dof,
             $donataria  AS donataria_vigente,
@@ -106,7 +118,7 @@ ejecutar(function () use ($pdo) {
         LEFT JOIN Municipio     m ON m.id_municipio = o.id_municipio
         LEFT JOIN Documentacion d ON d.id_osc = o.id_osc
         $where
-        GROUP BY o.id_osc, m.nombre_municipio, o.estatus_revision
+        GROUP BY o.id_osc, m.nombre_municipio, o.estatus_revision, o.estatus_operacion
         $having
         ORDER BY o.razon_social ASC
         LIMIT :limite OFFSET :desplaz";

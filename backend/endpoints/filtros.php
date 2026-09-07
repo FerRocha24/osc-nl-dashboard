@@ -40,5 +40,9 @@ ejecutar(function () use ($pdo) {
         // Resolución del Registro sobre la OSC completa, distinta del estatus
         // documental: la firma una persona.
         'resoluciones' => ['Todos', 'Pendiente', 'Aceptada', 'Denegada'],
+        // Catálogo fijo y no DISTINCT de la tabla: hoy la columna está vacía
+        // en las 779 (la importación que las cargó es anterior a la migración
+        // 012), y un desplegable vacío parecería un error.
+        'operaciones' => array_merge(['Todos'], ESTATUS_OPERACION),
     ];
 });

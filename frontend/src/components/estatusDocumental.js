@@ -29,3 +29,36 @@ export const CLASE_RESOLUCION = {
 };
 
 export const RESOLUCIONES = ["Pendiente", "Aceptada", "Denegada"];
+
+/**
+ * Estatus de operación: viene del padrón de la Secretaría (columna
+ * EstatusObservacion del Excel) y describe si la organización SIGUE
+ * FUNCIONANDO. No es lo mismo que la resolución del Registro: ninguno de sus
+ * cuatro valores dice "no registrada", porque a la que le niegan el registro
+ * nunca entra al padrón. "Baja" solo tiene sentido para algo que estuvo dentro.
+ */
+export const CLASE_OPERACION = {
+  Activa: "verde",
+  Actualizada: "verde",
+  "Sin evidencia de operación": "advertencia",
+  Baja: "peligro",
+};
+
+export const ESTATUS_OPERACION = [
+  "Activa",
+  "Actualizada",
+  "Sin evidencia de operación",
+  "Baja",
+];
+
+/** Lo que se muestra cuando el padrón todavía no trae el dato. */
+export const OPERACION_SIN_DATO = "Sin dato";
+
+/**
+ * Etiqueta corta para la tabla. "Sin evidencia de operación" son 26
+ * caracteres: en una celda parte el badge en dos renglones y descuadra la
+ * fila. El texto completo se conserva en el title y en la ficha.
+ */
+export const OPERACION_CORTA = {
+  "Sin evidencia de operación": "Sin evidencia",
+};

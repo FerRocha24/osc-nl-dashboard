@@ -36,6 +36,8 @@ ejecutar(function () use ($pdo) {
             o.registrada_jbpnl,
             o.estatus_revision, o.motivo_revision,
             o.fecha_revision, o.revisado_por,
+            o.estatus_operacion, o.observaciones_estatus,
+            o.ultima_fecha_visita, o.ultima_visita_observacion,
             $donataria  AS donataria_vigente,
             $estatusDoc AS estatus_documental,
             MAX(d.fecha_entrega) AS ultima_actualizacion
@@ -45,7 +47,9 @@ ejecutar(function () use ($pdo) {
         WHERE o.id_osc = :id
         GROUP BY o.id_osc, m.nombre_municipio,
                  o.estatus_revision, o.motivo_revision,
-                 o.fecha_revision, o.revisado_por");
+                 o.fecha_revision, o.revisado_por,
+                 o.estatus_operacion, o.observaciones_estatus,
+                 o.ultima_fecha_visita, o.ultima_visita_observacion");
     $stmt->bindValue(':id', $id, PDO::PARAM_INT);
     $stmt->execute();
     $osc = $stmt->fetch();

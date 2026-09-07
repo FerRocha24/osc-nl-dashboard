@@ -9,7 +9,8 @@ import { pedirJson, useApi } from "../api/client";
 import "./Pages.css";
 
 const FILTROS_INICIALES = {
-  municipio: "Todos", rubro: "Todos", estatus: "Todos", resolucion: "Todos",
+  municipio: "Todos", rubro: "Todos", operacion: "Todos",
+  estatus: "Todos", resolucion: "Todos",
 };
 const POR_PAGINA = 10;
 
@@ -48,6 +49,7 @@ export default function OperativaPage() {
           { clave: "razon_social", titulo: "Razón social" },
           { clave: "municipio", titulo: "Municipio" },
           { clave: "rubro", titulo: "Rubro" },
+          { clave: "estatus_operacion", titulo: "Operación" },
           { clave: "estatus_documental", titulo: "Estatus documental" },
           { clave: "estatus_revision", titulo: "Resolución" },
           { clave: "ultima_actualizacion", titulo: "Última actualización" },
@@ -64,7 +66,7 @@ export default function OperativaPage() {
     <div className="page">
       <Header exportacion={exportacion} />
       <FilterBar
-        campos={["municipio", "rubro", "estatus", "resolucion"]}
+        campos={["municipio", "rubro", "operacion", "estatus", "resolucion"]}
         valores={filtros}
         onChange={cambiarFiltros}
       />

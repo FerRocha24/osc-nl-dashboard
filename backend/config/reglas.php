@@ -184,3 +184,16 @@ const SQL_CATEGORIA_RUBRO = "
         ) THEN 'Grupos en situación de vulnerabilidad'
         ELSE 'Sin clasificar'
     END";
+
+// --- Catálogo: estatus de operación -----------------------------------------
+// Los cuatro valores que trae la columna EstatusObservacion del padrón de la
+// Secretaría. Describen si la organización SIGUE OPERANDO, no si el Registro
+// la admitió: ninguno dice "no registrada", porque a la que le niegan el
+// registro nunca la agregan al padrón. "Baja" solo aplica a algo que estuvo
+// dentro.
+const ESTATUS_OPERACION = [
+    'Activa',
+    'Actualizada',
+    'Sin evidencia de operación',
+    'Baja',
+];
