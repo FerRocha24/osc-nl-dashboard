@@ -90,18 +90,27 @@ export default function MapaUbicaciones({ filtros, onSeleccionar }) {
 
     for (const p of puntos) {
       const color = COLOR[CLASE_OPERACION[p.estatus_operacion] ?? "neutro"];
+      // Las dos clases de coordenada NO se dibujan igual. La del padrón es el
+      // domicilio verificado; la aproximada se calculó de la dirección escrita
+      // y cae en la cuadra, no en la puerta. Si se vieran idénticas, alguien
+      // saldría a una visita con una estimación creyendo que fue verificada.
+      const aproximada = p.origen_coordenada === "aproximada";
       const marcador = L.circleMarker([p.latitud, p.longitud], {
         radius: 6,
-        color: "#fff",
-        weight: 1.5,
+        color: aproximada ? color : "#fff",
+        weight: aproximada ? 2 : 1.5,
+        dashArray: aproximada ? "2 2" : undefined,
         fillColor: color,
-        fillOpacity: 0.85,
+        fillOpacity: aproximada ? 0.25 : 0.85,
       });
       marcador.bindPopup(`
         <strong>${escapar(p.razon_social)}</strong><br>
         <span class="mapa-pop__meta">Folio ${escapar(p.no_registro ?? "—")} ·
         ${escapar(p.municipio ?? "Sin municipio")}</span><br>
         <span class="mapa-pop__meta">${escapar(p.estatus_operacion ?? "Sin dato de operación")}</span>
+        ${aproximada
+          ? '<span class="mapa-pop__aprox">Ubicación aproximada, calculada de la dirección</span>'
+          : ""}
       `);
       if (onSeleccionar) {
         marcador.on("popupopen", () => {
@@ -125,6 +134,7 @@ export default function MapaUbicaciones({ filtros, onSeleccionar }) {
 
   const sinCoordenadas = !cargando && !error && puntos.length === 0;
   const total = datos?.total ?? 0;
+  const aproximadas = puntos.filter((p) => p.origen_coordenada === "aproximada").length;
 
   return (
     <div className="mapa-ubi">
@@ -154,10 +164,19 @@ export default function MapaUbicaciones({ filtros, onSeleccionar }) {
                   </>
                 ) : (
                   <>
-                    Solo se dibujan las organizaciones con coordenada en el
-                    padrón. Las {(total - puntos.length).toLocaleString("es-MX")}{" "}
-                    restantes no la tienen capturada; aparecerán en cuanto se
-                    importe un archivo que la incluya.
+                    Faltan {(total - puntos.length).toLocaleString("es-MX")}{" "}
+                    organizaciones sin ubicación que se pueda situar en el mapa.
+                    {aproximadas > 0 && (
+                      <>
+                        {" "}De las dibujadas,{" "}
+                        <strong>{aproximadas.toLocaleString("es-MX")}</strong>{" "}
+                        son <strong>aproximadas</strong> (círculo hueco):
+                        se calcularon de la dirección escrita, así que caen en
+                        la cuadra correcta pero no son el domicilio verificado.
+                        Se comprobó que cada una quedara dentro de su municipio;
+                        las que no, se descartaron.
+                      </>
+                    )}
                   </>
                 )}
               </NotaInfo>

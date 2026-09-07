@@ -116,6 +116,13 @@ ejecutar(function () use ($pdo) {
                 $osc['id_municipio'] = $idMunicipio;
             }
 
+            // Una coordenada del archivo es el domicilio verificado por la
+            // Secretaría, así que pisa a la calculada de la dirección. Marcarla
+            // aquí es lo que hace que no se vuelvan a confundir nunca.
+            if (($osc['latitud'] ?? null) !== null && ($osc['longitud'] ?? null) !== null) {
+                $osc['origen_coordenada'] = 'padron';
+            }
+
             $folio = $osc['no_registro'] ?? null;
             $idOsc = ($folio !== null && isset($existentes[$folio])) ? $existentes[$folio] : null;
 

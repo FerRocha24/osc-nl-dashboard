@@ -39,7 +39,7 @@ ejecutar(function () use ($pdo) {
             $categoria AS categoria,
             o.estatus_operacion,
             o.estatus_revision,
-            o.latitud, o.longitud
+            o.latitud, o.longitud, o.origen_coordenada
         FROM OSC o
         LEFT JOIN Municipio m ON m.id_municipio = o.id_municipio
         $where

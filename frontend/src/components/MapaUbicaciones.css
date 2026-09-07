@@ -72,3 +72,14 @@
   /* Los mosaicos no alcanzan a cargar antes de imprimir y salen en blanco. */
   .mapa-ubi { display: none; }
 }
+
+.mapa-pop__aprox {
+  display: block;
+  margin-top: 5px;
+  padding: 4px 7px;
+  font-size: 11px;
+  line-height: 1.4;
+  color: #8A5A02;
+  background: #FBF0DC;
+  border-radius: 5px;
+}
