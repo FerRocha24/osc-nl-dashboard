@@ -1,0 +1,281 @@
+.importar__fondo {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(38, 34, 32, 0.4);
+}
+
+.importar {
+  width: min(760px, 100%);
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-superficie);
+  border-radius: var(--radio);
+  overflow: hidden;
+}
+
+.importar__encabezado {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--color-borde);
+}
+
+.importar__encabezado h2 {
+  margin: 0;
+  font-family: var(--fuente-titulos);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-texto);
+}
+
+.importar__encabezado button {
+  width: 30px;
+  height: 30px;
+  font-size: 15px;
+  color: var(--color-texto-suave);
+  background: transparent;
+  border: 1px solid var(--color-borde);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.importar__encabezado button:hover { color: var(--color-peligro); border-color: var(--color-peligro); }
+
+.importar__cuerpo {
+  flex: 1;
+  overflow-y: auto;
+  padding: 18px 20px 24px;
+}
+
+.importar__intro {
+  margin: 0 0 16px;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--color-texto);
+}
+
+.importar h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 22px 0 8px;
+  font-family: var(--fuente-titulos);
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--color-primario);
+}
+
+.importar__conteo {
+  padding: 1px 7px;
+  font-family: var(--fuente-texto);
+  font-size: 11px;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--color-texto-suave);
+  background: var(--color-fondo);
+  border: 1px solid var(--color-borde);
+  border-radius: 20px;
+}
+
+/* ---- Paso 1: elegir archivo ---- */
+.importar__zona {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 28px 20px;
+  text-align: center;
+  background: var(--color-fondo);
+  border: 1px dashed var(--color-borde);
+  border-radius: var(--radio);
+  cursor: pointer;
+}
+
+.importar__zona:hover { border-color: var(--color-primario); }
+.importar__zona input { display: none; }
+
+.importar__boton {
+  padding: 9px 18px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #fff;
+  background: var(--color-primario);
+  border-radius: 8px;
+}
+
+.importar__ayuda {
+  margin: 6px 0 0;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--color-texto-suave);
+}
+
+.importar__nota {
+  margin: 16px 0 0;
+  padding: 11px 13px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--color-texto);
+  background: var(--color-primario-claro);
+  border-radius: 8px;
+}
+
+/* ---- Paso 2: vista previa ---- */
+.importar__cifras {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.importar__cifra {
+  padding: 12px;
+  text-align: center;
+  background: var(--color-fondo);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio);
+}
+
+.importar__cifra b {
+  display: block;
+  font-size: 22px;
+  line-height: 1.15;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-texto);
+}
+
+.importar__cifra span {
+  font-size: 11.5px;
+  color: var(--color-texto-suave);
+}
+
+/* Las dos cifras que implican un cambio en la base se resaltan. */
+.importar__cifra--crear b { color: var(--color-exito); }
+.importar__cifra--actualizar b { color: var(--color-primario); }
+
+.importar__aviso {
+  margin: 14px 0 0;
+  padding: 10px 12px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--color-texto);
+  background: #FDF3E0;
+  border-left: 3px solid var(--color-advertencia);
+  border-radius: 8px;
+}
+
+.importar__aviso code {
+  padding: 1px 4px;
+  font-size: 11.5px;
+  background: var(--color-superficie);
+  border-radius: 4px;
+}
+
+.importar__tabla-envoltura { overflow-x: auto; }
+
+.importar__tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+}
+
+.importar__tabla th {
+  padding: 7px 9px;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-align: left;
+  white-space: nowrap;
+  color: var(--color-texto-suave);
+  border-bottom: 1px solid var(--color-borde);
+}
+
+.importar__tabla td {
+  padding: 7px 9px;
+  color: var(--color-texto);
+  border-bottom: 1px solid var(--color-borde);
+}
+
+.importar__advertencias {
+  margin: 0;
+  padding: 0 0 0 18px;
+  max-height: 190px;
+  overflow-y: auto;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--color-texto-suave);
+}
+
+.importar__advertencias li { margin: 3px 0; }
+
+.importar__acciones {
+  display: flex;
+  gap: 9px;
+  margin-top: 22px;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-borde);
+  flex-wrap: wrap;
+}
+
+.importar__acciones button {
+  padding: 9px 16px;
+  font-family: var(--fuente-texto);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-texto);
+  background: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.importar__acciones button:hover:not(:disabled) { border-color: var(--color-texto-suave); }
+.importar__acciones button:disabled { opacity: 0.6; cursor: default; }
+
+.importar__confirmar {
+  font-weight: 600 !important;
+  color: #fff !important;
+  background: var(--color-primario) !important;
+  border-color: var(--color-primario) !important;
+}
+
+.importar__confirmar:hover:not(:disabled) { background: var(--color-primario-oscuro) !important; }
+
+/* ---- Paso 3: resultado ---- */
+.importar__exito {
+  padding: 18px;
+  text-align: center;
+  background: var(--color-fondo);
+  border: 1px solid var(--color-verde);
+  border-radius: var(--radio);
+}
+
+.importar__exito-titulo {
+  margin: 0 0 6px;
+  font-family: var(--fuente-titulos);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-verde);
+}
+
+.importar__exito p { margin: 0; font-size: 13.5px; color: var(--color-texto); }
+
+.importar__error {
+  margin: 0 0 14px;
+  padding: 10px 12px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--color-peligro);
+  background: #FBEDEB;
+  border-radius: 8px;
+}

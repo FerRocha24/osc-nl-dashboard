@@ -2,6 +2,7 @@ import { useState } from "react";
 import { NavLink } from "react-router-dom";
 import ExportButton from "./ExportButton";
 import AdminUsuarios from "./AdminUsuarios";
+import ImportarPadron from "./ImportarPadron";
 import CambiarPassword from "./CambiarPassword";
 import { cerrarSesion, obtenerSesion, tieneRol } from "../api/auth";
 import "./Header.css";
@@ -56,9 +57,14 @@ export default function Header({ exportacion }) {
         </div>
         <ExportButton exportacion={exportacion} />
         {tieneRol("admin") && (
-          <button type="button" className="dash-header__salir" onClick={() => setPanel("usuarios")}>
-            Usuarios
-          </button>
+          <>
+            <button type="button" className="dash-header__salir" onClick={() => setPanel("importar")}>
+              Importar
+            </button>
+            <button type="button" className="dash-header__salir" onClick={() => setPanel("usuarios")}>
+              Usuarios
+            </button>
+          </>
         )}
         <button type="button" className="dash-header__salir" onClick={() => setPanel("password")}>
           Contraseña
@@ -68,6 +74,14 @@ export default function Header({ exportacion }) {
         </button>
       </div>
 
+      {panel === "importar" && (
+        <ImportarPadron
+          onCerrar={() => setPanel(null)}
+          // Recargar deja ver los datos recién importados sin que la persona
+          // tenga que darse cuenta de que el tablero quedó desactualizado.
+          onImportado={() => setTimeout(() => window.location.reload(), 1500)}
+        />
+      )}
       {panel === "usuarios" && <AdminUsuarios onCerrar={() => setPanel(null)} />}
       {panel === "password" && (
         <CambiarPassword onListo={() => setPanel(null)} />
