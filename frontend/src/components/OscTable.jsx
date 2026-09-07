@@ -1,13 +1,13 @@
+import { useState } from "react";
 import Estado from "./EstadoPanel";
+import { CLASE_ESTATUS } from "./estatusDocumental";
 import "./OscTable.css";
 
 function StatusBadge({ status }) {
-  const map = {
-    Completo: "verde",
-    Pendiente: "advertencia",
-    Vencido: "peligro",
-  };
-  return <span className={`status-badge status-badge--${map[status]}`}>{status}</span>;
+  // El respaldo importa: si mañana se agrega un estatus al ENUM y se olvida
+  // aquí, sale una etiqueta ámbar y no una sin color.
+  const clase = CLASE_ESTATUS[status] ?? "advertencia";
+  return <span className={`status-badge status-badge--${clase}`}>{status}</span>;
 }
 
 // Las fechas llegan del backend como 'YYYY-MM-DD' o null. Se construyen con
@@ -26,6 +26,10 @@ export default function OscTable({
   osc = [], total = 0, pagina = 1, limite = 10,
   cargando, error, onReintentar, onCambiarPagina, onSeleccionar,
 }) {
+  // Lo que se está tecleando en "Ir a la página". Se guarda como texto y no
+  // como número para poder dejar el campo vacío mientras se borra.
+  const [destino, setDestino] = useState("");
+
   const totalPaginas = Math.max(1, Math.ceil(total / limite));
   const desde = total === 0 ? 0 : (pagina - 1) * limite + 1;
   const hasta = Math.min(pagina * limite, total);
@@ -35,6 +39,16 @@ export default function OscTable({
   const inicioVentana = Math.max(1, Math.min(pagina - 1, totalPaginas - 2));
   const paginasVisibles = [inicioVentana, inicioVentana + 1, inicioVentana + 2]
     .filter((n) => n >= 1 && n <= totalPaginas);
+
+  const irADestino = (evento) => {
+    evento.preventDefault();
+    const n = Number.parseInt(destino, 10);
+    // Fuera de rango no se rechaza con un error: se va al extremo más cercano,
+    // que es lo que la persona quería al escribir 999 en un padrón de 78.
+    if (Number.isNaN(n)) return;
+    onCambiarPagina?.(Math.min(Math.max(n, 1), totalPaginas));
+    setDestino("");
+  };
 
   return (
     <div className="osc-table-wrapper">
@@ -126,6 +140,35 @@ export default function OscTable({
             Siguiente
           </button>
         </nav>
+
+        {/* Con 78 páginas, llegar a la 60 a punta de "Siguiente" son 59 clics.
+            Solo aparece cuando hay más páginas de las que caben en la fila. */}
+        {totalPaginas > 3 && (
+          <form
+            className="osc-table__ir"
+            onSubmit={irADestino}
+            // Sin esto el navegador bloquea el envío en silencio al escribir un
+            // número mayor que max, y nunca corre el ajuste al rango de abajo.
+            // min/max se quedan: acotan las flechitas y el lector de pantalla
+            // anuncia hasta dónde llega el padrón.
+            noValidate
+          >
+            <label htmlFor="osc-ir-pagina">Ir a la página</label>
+            <input
+              id="osc-ir-pagina"
+              type="number"
+              min={1}
+              max={totalPaginas}
+              inputMode="numeric"
+              placeholder={String(pagina)}
+              value={destino}
+              disabled={cargando}
+              onChange={(e) => setDestino(e.target.value)}
+            />
+            <span>de {totalPaginas.toLocaleString("es-MX")}</span>
+            <button type="submit" disabled={cargando || destino === ""}>Ir</button>
+          </form>
+        )}
       </div>
     </div>
   );

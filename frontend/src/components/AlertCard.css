@@ -68,3 +68,33 @@
   font-weight: 700;
   color: var(--color-peligro);
 }
+
+.alert-card__par {
+  display: flex;
+  gap: 26px;
+  margin-top: 10px;
+}
+
+.alert-card__par-lado {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.alert-card__par-valor {
+  font-family: var(--fuente-titulos);
+  font-size: 27px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+
+/* No se usa --color-verde directo: ese tono sobre fondo blanco queda en 2.9:1
+   y aquí es texto, no un relleno decorativo. */
+.alert-card__par-valor--verde { color: #1F6B4F; }
+.alert-card__par-valor--peligro { color: var(--color-peligro); }
+
+.alert-card__par-etiqueta {
+  font-size: 11.5px;
+  color: var(--color-texto-suave);
+}

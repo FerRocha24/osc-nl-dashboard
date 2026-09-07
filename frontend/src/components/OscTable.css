@@ -69,6 +69,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
   padding: 14px 18px;
   font-size: 12px;
   color: var(--color-texto-suave);
@@ -133,4 +135,56 @@
 .osc-table__fila--clic:focus-visible {
   outline: 2px solid var(--color-primario);
   outline-offset: -2px;
+}
+
+.osc-table__ir {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  color: var(--color-texto-suave);
+  white-space: nowrap;
+}
+
+.osc-table__ir input {
+  width: 62px;
+  padding: 5px 8px;
+  font-family: var(--fuente-texto);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-texto);
+  background-color: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: 6px;
+}
+
+.osc-table__ir input:focus {
+  outline: 2px solid var(--color-primario);
+  outline-offset: 1px;
+  border-color: transparent;
+}
+
+.osc-table__ir button {
+  padding: 5px 12px;
+  font-family: var(--fuente-texto);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-texto);
+  background-color: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.osc-table__ir button:hover:not(:disabled) {
+  color: var(--color-primario);
+  border-color: var(--color-primario);
+}
+
+.osc-table__ir button:disabled { opacity: 0.5; cursor: default; }
+
+/* En pantallas chicas el salto se va a su propio renglón, completo. */
+@media (max-width: 720px) {
+  .osc-table__pagination { justify-content: flex-start; }
+  .osc-table__ir { width: 100%; }
 }

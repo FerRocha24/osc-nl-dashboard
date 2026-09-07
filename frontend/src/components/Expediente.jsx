@@ -4,6 +4,7 @@ import { tieneRol } from "../api/auth";
 import Estado from "./EstadoPanel";
 import VisorArchivo from "./VisorArchivo";
 import "./Expediente.css";
+import { CLASE_ESTATUS } from "./estatusDocumental";
 
 // Expediente digital de una OSC: subir documentos, verlos y decidir si se
 // aprueban o se rechazan.
@@ -17,13 +18,6 @@ const TIPOS_SUGERIDOS = [
   "Informe anual de actividades",
   "Otro",
 ];
-
-const CLASE_ESTATUS = {
-  Completo: "verde",
-  Pendiente: "advertencia",
-  Vencido: "peligro",
-  Rechazado: "peligro",
-};
 
 function formatearTamano(bytes) {
   if (!bytes) return "";

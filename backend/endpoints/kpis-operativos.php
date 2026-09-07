@@ -7,6 +7,7 @@
 //   porcentaje_completitud_documental % de documentos en estatus 'Completo'
 //   osc_documentacion_incompleta     # de OSC con algún documento no validado
 //                                    (o sin ningún documento cargado)
+//   osc_aceptadas / osc_rechazadas   # de OSC según el resultado de la revisión
 
 require_once __DIR__ . '/../config/api.php';
 
@@ -52,10 +53,30 @@ ejecutar(function () use ($pdo) {
         ) AS incompletas";
     $oscIncompletas = (int) $pdo->query($sql)->fetchColumn();
 
+    // --- KPI 4: resultado de la revisión ---
+    // Aceptadas y rechazadas se cuentan por OSC, no por documento: lo que se
+    // decide en la ficha es el expediente completo. Se reusa la misma regla
+    // que pinta la columna "Estatus documental" del padrón, para que el número
+    // de la tarjeta y las filas de la tabla no se puedan contradecir.
+    $estatus = SQL_ESTATUS_DOCUMENTAL;
+    $sql = "
+        SELECT
+            SUM(estatus = 'Completo')   AS aceptadas,
+            SUM(estatus = 'Rechazado')  AS rechazadas
+        FROM (
+            SELECT $estatus AS estatus
+            FROM OSC o
+            LEFT JOIN Documentacion d ON d.id_osc = o.id_osc
+            GROUP BY o.id_osc
+        ) AS por_osc";
+    $fila = $pdo->query($sql)->fetch();
+
     return [
         'porcentaje_donataria_vigente'      => $pctDonataria,
         'porcentaje_completitud_documental' => $pctCompletitud,
         'osc_documentacion_incompleta'      => $oscIncompletas,
+        'osc_aceptadas'                     => (int) $fila['aceptadas'],
+        'osc_rechazadas'                    => (int) $fila['rechazadas'],
         // Contexto útil para depurar y para mostrar "23 de 327" en la UI
         'detalle' => [
             'total_osc'            => $totalOsc,

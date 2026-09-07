@@ -1,7 +1,7 @@
 import { useState } from "react";
 import Header from "../components/Header";
 import FilterBar from "../components/FilterBar";
-import { AlertRing, AlertBar, AlertNumber } from "../components/AlertCard";
+import { AlertRing, AlertBar, AlertNumber, AlertRevision } from "../components/AlertCard";
 import OscTable from "../components/OscTable";
 import Estado from "../components/EstadoPanel";
 import OscDetalle from "../components/OscDetalle";
@@ -77,6 +77,11 @@ export default function OperativaPage() {
               <AlertNumber
                 label="OSC con documentación incompleta"
                 value={(kpis.datos?.osc_documentacion_incompleta ?? 0).toLocaleString("es-MX")}
+              />
+              <AlertRevision
+                label="Resultado de la revisión"
+                aceptadas={kpis.datos?.osc_aceptadas ?? 0}
+                rechazadas={kpis.datos?.osc_rechazadas ?? 0}
               />
             </>
           </Estado>

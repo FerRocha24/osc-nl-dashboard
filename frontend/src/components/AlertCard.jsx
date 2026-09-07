@@ -63,3 +63,31 @@ export function AlertNumber({ label, value }) {
     </div>
   );
 }
+
+/**
+ * Resultado de la revisión: dos números en una sola tarjeta.
+ *
+ * Van juntos y no en dos tarjetas porque solo significan algo comparados: 12
+ * aceptadas es una noticia distinta si hay 1 rechazada o si hay 40.
+ */
+export function AlertRevision({ label, aceptadas, rechazadas }) {
+  return (
+    <div className="alert-card alert-card--verde">
+      <p className="alert-card__label">{label}</p>
+      <div className="alert-card__par">
+        <div className="alert-card__par-lado">
+          <span className="alert-card__par-valor alert-card__par-valor--verde">
+            {aceptadas.toLocaleString("es-MX")}
+          </span>
+          <span className="alert-card__par-etiqueta">Aceptadas</span>
+        </div>
+        <div className="alert-card__par-lado">
+          <span className="alert-card__par-valor alert-card__par-valor--peligro">
+            {rechazadas.toLocaleString("es-MX")}
+          </span>
+          <span className="alert-card__par-etiqueta">Rechazadas</span>
+        </div>
+      </div>
+    </div>
+  );
+}

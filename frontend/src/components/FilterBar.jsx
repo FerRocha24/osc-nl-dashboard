@@ -1,5 +1,6 @@
 import { useApi } from "../api/client";
 import "./FilterBar.css";
+import { ESTATUS_DOCUMENTAL } from "./estatusDocumental";
 
 // Las opciones se piden a filtros.php, que las saca de
 // los municipios, rubros y categorías que realmente existen en la base.
@@ -13,7 +14,7 @@ const OPCIONES_INICIALES = {
   municipios: ["Todos"],
   rubros: ["Todos"],
   categorias: ["Todos"],
-  estatus: ["Todos", "Completo", "Pendiente", "Vencido"],
+  estatus: ["Todos", ...ESTATUS_DOCUMENTAL],
 };
 
 const CAMPOS = {

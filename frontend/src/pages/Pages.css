@@ -14,7 +14,9 @@
 
 .page__alerts {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  /* auto-fit y no un número fijo: la fila pasó de 3 a 4 tarjetas y así no hay
+     que tocar esto la próxima vez. */
+  grid-template-columns: repeat(auto-fit, minmax(228px, 1fr));
   gap: 20px;
 }
 
