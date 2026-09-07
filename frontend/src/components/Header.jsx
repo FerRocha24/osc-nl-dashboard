@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { NavLink } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
+import Logo from "./Logo";
 import ExportButton from "./ExportButton";
 import ImportarPadron from "./ImportarPadron";
 import CambiarPassword from "./CambiarPassword";
@@ -17,10 +18,13 @@ export default function Header({ exportacion }) {
 
   return (
     <header className="dash-header">
-      <div className="dash-header__brand">
-        <span className="dash-header__logo">OSC</span>
+      {/* El escudo y el nombre llevan a la Vista Operativa: es la salida de
+          emergencia que todo el mundo busca en la esquina superior izquierda,
+          y hacía falta sobre todo desde /usuarios, que no tiene pestaña. */}
+      <Link to="/" className="dash-header__brand">
+        <Logo alto={40} />
         <span className="dash-header__title">Tablero Inteligente</span>
-      </div>
+      </Link>
 
       <nav className="dash-header__tabs">
         <NavLink

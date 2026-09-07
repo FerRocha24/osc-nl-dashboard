@@ -26,19 +26,6 @@
   gap: 10px;
 }
 
-.login__logo {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 30px;
-  height: 30px;
-  font-size: 11px;
-  font-weight: 700;
-  color: #fff;
-  background: var(--color-primario);
-  border-radius: 7px;
-}
-
 .login__titulo {
   font-family: var(--fuente-titulos);
   font-size: 17px;

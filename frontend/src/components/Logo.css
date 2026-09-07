@@ -1,0 +1,18 @@
+.logo {
+  width: auto;
+  display: block;
+  flex-shrink: 0;
+}
+
+.logo__respaldo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-family: var(--fuente-titulos);
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  background: var(--color-primario);
+  border-radius: 8px;
+}

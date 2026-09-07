@@ -3,6 +3,7 @@ import { enviarJson } from "../api/client";
 import { actualizarSesion, cerrarSesion } from "../api/auth";
 import "./LoginPage.css";
 import "./CambiarPassword.css";
+import Logo from "./Logo";
 
 /**
  * Cambio de contraseña, en dos presentaciones:
@@ -75,7 +76,7 @@ export default function CambiarPassword({ obligatorio = false, onCerrar, onListo
   const formulario = (
     <form className="login__caja" onSubmit={enviar}>
       <div className="login__marca">
-        <span className="login__logo">OSC</span>
+        <Logo alto={38} />
         <span className="login__titulo">Cambia tu contraseña</span>
       </div>
       <p className="login__subtitulo">

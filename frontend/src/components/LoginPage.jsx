@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { iniciarSesion } from "../api/client";
 import "./LoginPage.css";
+import Logo from "./Logo";
 
 // Pantalla de acceso. El tablero maneja datos de contacto de organizaciones
 // reales, así que no debe quedar abierto a quien tenga la URL.
@@ -34,7 +35,7 @@ export default function LoginPage() {
     <div className="login">
       <form className="login__caja" onSubmit={enviar}>
         <div className="login__marca">
-          <span className="login__logo">OSC</span>
+          <Logo alto={38} />
           <span className="login__titulo">Tablero Inteligente</span>
         </div>
         <p className="login__subtitulo">

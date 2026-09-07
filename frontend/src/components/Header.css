@@ -17,20 +17,15 @@
   align-items: center;
   gap: 10px;
   flex-shrink: 0;
+  text-decoration: none;
+  border-radius: 8px;
 }
 
-.dash-header__logo {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 34px;
-  height: 34px;
-  border-radius: 8px;
-  background-color: var(--color-primario);
-  color: white;
-  font-family: var(--fuente-titulos);
-  font-weight: 700;
-  font-size: 13px;
+.dash-header__brand:hover .dash-header__title { color: var(--color-primario); }
+
+.dash-header__brand:focus-visible {
+  outline: 2px solid var(--color-primario);
+  outline-offset: 3px;
 }
 
 .dash-header__title {
