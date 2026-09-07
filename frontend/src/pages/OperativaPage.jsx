@@ -56,6 +56,7 @@ export default function OperativaPage() {
           { clave: "estatus_documental", titulo: "Estatus documental" },
           { clave: "estatus_revision", titulo: "Resolución" },
           { clave: "asignado_a", titulo: "Responsable" },
+          { clave: "ubicacion_fisica", titulo: "Expediente físico" },
           { clave: "ultima_actualizacion", titulo: "Última actualización" },
           { clave: "actividad_principal", titulo: "Actividad principal" },
         ],

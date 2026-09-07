@@ -66,6 +66,7 @@ ejecutar(function () use ($pdo) {
             $donataria  AS donataria_vigente,
             $estatusDoc AS estatus_documental,
             $aprobados  AS documentos_aprobados,
+            o.ubicacion_fisica,
             o.asignado_a_id,
             u.nombre AS asignado_a,
             MAX(d.fecha_entrega) AS ultima_actualizacion
@@ -75,7 +76,8 @@ ejecutar(function () use ($pdo) {
         LEFT JOIN Usuario       u ON u.id_usuario = o.asignado_a_id
         $where
         GROUP BY o.id_osc, m.nombre_municipio, o.estatus_revision,
-                 o.estatus_operacion, o.asignado_a_id, u.nombre
+                 o.estatus_operacion, o.ubicacion_fisica,
+                 o.asignado_a_id, u.nombre
         $having
         ORDER BY o.razon_social ASC
         LIMIT :limite OFFSET :desplaz";

@@ -40,6 +40,7 @@ ejecutar(function () use ($pdo) {
             o.asignado_a_id, ua.nombre AS asignado_a, o.fecha_asignacion,
             o.estatus_operacion, o.observaciones_estatus,
             o.ultima_fecha_visita, o.ultima_visita_observacion,
+            o.ubicacion_fisica,
             $donataria  AS donataria_vigente,
             $estatusDoc AS estatus_documental,
             $aprobados  AS documentos_aprobados,
@@ -54,7 +55,8 @@ ejecutar(function () use ($pdo) {
                  o.fecha_revision, o.revisado_por,
                  o.asignado_a_id, ua.nombre, o.fecha_asignacion,
                  o.estatus_operacion, o.observaciones_estatus,
-                 o.ultima_fecha_visita, o.ultima_visita_observacion");
+                 o.ultima_fecha_visita, o.ultima_visita_observacion,
+                 o.ubicacion_fisica");
     $stmt->bindValue(':id', $id, PDO::PARAM_INT);
     $stmt->execute();
     $osc = $stmt->fetch();

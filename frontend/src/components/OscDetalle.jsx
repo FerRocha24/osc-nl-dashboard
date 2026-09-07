@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useApi } from "../api/client";
 import Estado from "./EstadoPanel";
 import Expediente from "./Expediente";
+import ExpedienteFisico from "./ExpedienteFisico";
 import ResolucionOsc from "./ResolucionOsc";
 import OperacionOsc from "./OperacionOsc";
 import AsignarOsc from "./AsignarOsc";
@@ -143,6 +144,12 @@ export default function OscDetalle({ idOsc, onCerrar }) {
 
                 <section className="detalle__seccion">
                   <ResolucionOsc osc={osc} onResuelto={recargar} />
+                </section>
+
+                {/* Antes del digital: si el papel es el original, saber
+                    dónde está es lo primero que hace falta para revisarlo. */}
+                <section className="detalle__seccion">
+                  <ExpedienteFisico osc={osc} onGuardado={recargar} />
                 </section>
 
                 <section className="detalle__seccion">
