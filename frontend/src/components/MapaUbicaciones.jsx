@@ -88,31 +88,57 @@ export default function MapaUbicaciones({ filtros, onSeleccionar }) {
       return;
     }
 
+    // Varias OSC caen en la misma coordenada: comparten domicilio, o el
+    // geocodificador devolvió el centro de la calle. Hay un punto con 11.
+    // Apiladas, solo se podría abrir la de encima; y separarlas moviéndolas
+    // unos metros sería inventar posiciones. Se dibuja un marcador y su
+    // ventana las lista todas.
+    const grupos = new Map();
     for (const p of puntos) {
-      const color = COLOR[CLASE_OPERACION[p.estatus_operacion] ?? "neutro"];
+      const clave = `${p.latitud},${p.longitud}`;
+      if (!grupos.has(clave)) grupos.set(clave, []);
+      grupos.get(clave).push(p);
+    }
+
+    for (const grupo of grupos.values()) {
+      const p = grupo[0];
+      // Con estatus mezclados en el mismo punto, ningún color sería honesto.
+      const clases = new Set(grupo.map((x) => CLASE_OPERACION[x.estatus_operacion] ?? "neutro"));
+      const color = COLOR[clases.size === 1 ? [...clases][0] : "neutro"];
       // Las dos clases de coordenada NO se dibujan igual. La del padrón es el
       // domicilio verificado; la aproximada se calculó de la dirección escrita
       // y cae en la cuadra, no en la puerta. Si se vieran idénticas, alguien
       // saldría a una visita con una estimación creyendo que fue verificada.
-      const aproximada = p.origen_coordenada === "aproximada";
+      const aproximada = grupo.some((x) => x.origen_coordenada === "aproximada");
       const marcador = L.circleMarker([p.latitud, p.longitud], {
-        radius: 6,
+        // Un punto con varias crece un poco, para que se note que ahí hay más
+        // de una antes de abrirlo.
+        radius: grupo.length > 1 ? 8 : 6,
         color: aproximada ? color : "#fff",
         weight: aproximada ? 2 : 1.5,
         dashArray: aproximada ? "2 2" : undefined,
         fillColor: color,
         fillOpacity: aproximada ? 0.25 : 0.85,
       });
-      marcador.bindPopup(`
-        <strong>${escapar(p.razon_social)}</strong><br>
-        <span class="mapa-pop__meta">Folio ${escapar(p.no_registro ?? "—")} ·
-        ${escapar(p.municipio ?? "Sin municipio")}</span><br>
-        <span class="mapa-pop__meta">${escapar(p.estatus_operacion ?? "Sin dato de operación")}</span>
-        ${aproximada
-          ? '<span class="mapa-pop__aprox">Ubicación aproximada, calculada de la dirección</span>'
-          : ""}
-      `);
-      if (onSeleccionar) {
+      const aviso = aproximada
+        ? '<span class="mapa-pop__aprox">Ubicación aproximada, calculada de la dirección</span>'
+        : "";
+
+      marcador.bindPopup(
+        grupo.length === 1
+          ? `<strong>${escapar(p.razon_social)}</strong><br>
+             <span class="mapa-pop__meta">Folio ${escapar(p.no_registro ?? "—")} ·
+             ${escapar(p.municipio ?? "Sin municipio")}</span><br>
+             <span class="mapa-pop__meta">${escapar(p.estatus_operacion ?? "Sin dato de operación")}</span>
+             ${aviso}`
+          : `<strong>${grupo.length} organizaciones en esta ubicación</strong><br>
+             <span class="mapa-pop__meta">${escapar(p.municipio ?? "Sin municipio")}</span>
+             <ul class="mapa-pop__lista">
+               ${grupo.map((x) => `<li>${escapar(x.razon_social)}</li>`).join("")}
+             </ul>
+             ${aviso}`
+      );
+      if (onSeleccionar && grupo.length === 1) {
         marcador.on("popupopen", () => {
           const nodo = marcador.getPopup().getElement();
           const boton = document.createElement("button");
