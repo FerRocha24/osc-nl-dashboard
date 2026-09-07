@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { useApi } from "../api/client";
@@ -40,9 +40,11 @@ function escapar(texto) {
  */
 export default function MapaUbicaciones({ filtros, onSeleccionar }) {
   const { datos, cargando, error, recargar } = useApi("osc-ubicaciones.php", filtros);
-  const contenedor = useRef(null);
   const mapa = useRef(null);
   const capa = useRef(null);
+  // Sirve para volver a dibujar los puntos cuando el mapa nace DESPUÉS de que
+  // llegaron los datos, que es el caso normal.
+  const [listo, setListo] = useState(false);
 
   // useMemo y no `datos?.puntos ?? []` directo: ese literal es un array nuevo
   // en cada render, y el efecto de abajo lo tiene como dependencia. Sin esto
@@ -50,12 +52,24 @@ export default function MapaUbicaciones({ filtros, onSeleccionar }) {
   // fitBounds peleaba con el zoom que la persona acabara de hacer.
   const puntos = useMemo(() => datos?.puntos ?? [], [datos]);
 
-  // El mapa se crea una sola vez. Leaflet maneja su propio DOM, así que
-  // recrearlo en cada render perdería el zoom y la posición de la persona.
-  useEffect(() => {
-    if (mapa.current || !contenedor.current) return;
+  // Ref de callback y no useRef con un efecto de montaje.
+  //
+  // El <div> del mapa vive dentro de <Estado>, que mientras carga muestra
+  // "Cargando…" y no lo monta. Un efecto con dependencias vacías corría antes
+  // de que el div existiera, encontraba la referencia en null, se salía, y no
+  // se volvía a ejecutar nunca: el mapa jamás se creaba. La ref de callback se
+  // dispara justo cuando el nodo entra al DOM, y otra vez con null al salir.
+  const montarLienzo = useCallback((nodo) => {
+    if (nodo === null) {
+      mapa.current?.remove();
+      mapa.current = null;
+      capa.current = null;
+      setListo(false);
+      return;
+    }
+    if (mapa.current) return;
 
-    mapa.current = L.map(contenedor.current, {
+    mapa.current = L.map(nodo, {
       center: VISTA_ESTADO.centro,
       zoom: VISTA_ESTADO.zoom,
       // El scroll de la rueda se activa solo al hacer clic: si no, bajar por
@@ -72,11 +86,7 @@ export default function MapaUbicaciones({ filtros, onSeleccionar }) {
     }).addTo(mapa.current);
 
     capa.current = L.layerGroup().addTo(mapa.current);
-
-    return () => {
-      mapa.current?.remove();
-      mapa.current = null;
-    };
+    setListo(true);
   }, []);
 
   // Los puntos sí se redibujan cuando cambian los filtros.
@@ -156,7 +166,7 @@ export default function MapaUbicaciones({ filtros, onSeleccionar }) {
     // dejaría los puntos como un manchón en una esquina.
     const limites = L.latLngBounds(puntos.map((p) => [p.latitud, p.longitud]));
     mapa.current.fitBounds(limites, { padding: [28, 28], maxZoom: 14 });
-  }, [puntos, onSeleccionar]);
+  }, [listo, puntos, onSeleccionar]);
 
   const sinCoordenadas = !cargando && !error && puntos.length === 0;
   const total = datos?.total ?? 0;
@@ -169,7 +179,7 @@ export default function MapaUbicaciones({ filtros, onSeleccionar }) {
           {/* El contenedor se mantiene montado aunque no haya puntos: Leaflet
               necesita el nodo para existir, y desmontarlo obligaría a recrear
               el mapa cada vez que un filtro se queda sin resultados. */}
-          <div className="mapa-ubi__lienzo" ref={contenedor}>
+          <div className="mapa-ubi__lienzo" ref={montarLienzo}>
             {/* La cuenta va encima del mapa y el porqué detrás del signo: un
                 párrafo fijo debajo se deja de leer a la tercera vez, pero la
                 cifra sí hace falta a la vista para no creer que faltan puntos
