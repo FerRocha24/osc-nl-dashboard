@@ -52,8 +52,8 @@ ejecutar(function () use ($pdo) {
         GROUP BY o.id_osc, m.nombre_municipio,
                  o.estatus_revision, o.motivo_revision,
                  o.fecha_revision, o.revisado_por,
-                 o.asignado_a_id, ua.nombre AS asignado_a, o.fecha_asignacion,
-            o.estatus_operacion, o.observaciones_estatus,
+                 o.asignado_a_id, ua.nombre, o.fecha_asignacion,
+                 o.estatus_operacion, o.observaciones_estatus,
                  o.ultima_fecha_visita, o.ultima_visita_observacion");
     $stmt->bindValue(':id', $id, PDO::PARAM_INT);
     $stmt->execute();
