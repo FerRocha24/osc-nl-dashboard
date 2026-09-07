@@ -176,7 +176,22 @@ export default function EstrategicaPage() {
                     layout="vertical"
                     align="right"
                     verticalAlign="middle"
-                    wrapperStyle={{ fontSize: 11, lineHeight: "18px" }}
+                    wrapperStyle={{
+                      fontSize: 11,
+                      lineHeight: "18px",
+                      // Recharts posiciona la leyenda en absoluto y no la
+                      // recorta: con muchas series se derrama sobre el resto
+                      // de la página y llega a tapar controles de otros
+                      // paneles. Pasó en producción, con un backend viejo que
+                      // devolvía los 82 rubros sin agrupar en vez de las 9
+                      // categorías: la lista tapaba las pastillas del mapa y
+                      // no dejaba hacer clic. El tope y el scroll propio hacen
+                      // que un dato inesperado degrade la leyenda, no la
+                      // página entera.
+                      maxHeight: 240,
+                      maxWidth: "45%",
+                      overflowY: "auto",
+                    }}
                   />
                 </PieChart>
               </ResponsiveContainer>

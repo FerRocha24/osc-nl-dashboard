@@ -22,4 +22,8 @@
 
 .chart-panel__body {
   width: 100%;
+  /* Ninguna gráfica debe poder dibujar fuera de su panel. Recharts posiciona
+     la leyenda en absoluto y, con muchas series, se derramaba sobre los
+     paneles vecinos y tapaba sus controles. */
+  overflow: hidden;
 }
