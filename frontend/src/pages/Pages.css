@@ -127,3 +127,14 @@
     break-inside: avoid;
   }
 }
+
+.page__sin-permiso {
+  margin: 0;
+  padding: 20px 18px;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--color-texto-suave);
+  background: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio);
+}

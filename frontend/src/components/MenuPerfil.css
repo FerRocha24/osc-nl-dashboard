@@ -76,6 +76,9 @@
   border: none;
   border-radius: 7px;
   cursor: pointer;
+  /* La opción de Usuarios es un <a>: sin esto llega con subrayado y en azul. */
+  text-decoration: none;
+  box-sizing: border-box;
 }
 
 .perfil__opcion:hover { background: var(--color-fondo); }

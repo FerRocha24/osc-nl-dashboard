@@ -11,6 +11,7 @@ import "./styles/global.css";
 // no necesita nada de eso: así la pantalla de acceso baja solo lo suyo.
 const OperativaPage = lazy(() => import("./pages/OperativaPage"));
 const EstrategicaPage = lazy(() => import("./pages/EstrategicaPage"));
+const UsuariosPage = lazy(() => import("./pages/UsuariosPage"));
 
 export default function App() {
   // La sesión vive en sessionStorage; aquí solo se refleja para decidir qué
@@ -67,6 +68,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<OperativaPage />} />
           <Route path="/estrategica" element={<EstrategicaPage />} />
+          <Route path="/usuarios" element={<UsuariosPage />} />
         </Routes>
       </Suspense>
     </BrowserRouter>

@@ -1,12 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { cerrarSesion, obtenerSesion } from "../api/auth";
+import { Link } from "react-router-dom";
+import { cerrarSesion, obtenerSesion, tieneRol } from "../api/auth";
+import { NOMBRE_ROL } from "./roles";
 import "./MenuPerfil.css";
-
-const NOMBRE_ROL = {
-  admin: "Administrador",
-  revisor: "Revisor",
-  consulta: "Consulta",
-};
 
 /**
  * Toma las iniciales del nombre para el círculo del perfil.
@@ -69,6 +65,19 @@ export default function MenuPerfil({ onCambiarPassword }) {
             <p className="perfil__nombre">{nombre}</p>
             <p className="perfil__rol">{NOMBRE_ROL[sesion?.rol] ?? ""}</p>
           </div>
+
+          {tieneRol("admin") && (
+            /* Enlace y no botón: administrar cuentas es ir a otra pantalla, y
+               así se puede abrir en otra pestaña como cualquier enlace. */
+            <Link
+              to="/usuarios"
+              role="menuitem"
+              className="perfil__opcion"
+              onClick={() => setAbierto(false)}
+            >
+              Usuarios del tablero
+            </Link>
+          )}
 
           <button
             type="button"

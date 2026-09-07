@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { NavLink } from "react-router-dom";
 import ExportButton from "./ExportButton";
-import AdminUsuarios from "./AdminUsuarios";
 import ImportarPadron from "./ImportarPadron";
 import CambiarPassword from "./CambiarPassword";
 import MenuPerfil from "./MenuPerfil";
@@ -47,14 +46,9 @@ export default function Header({ exportacion }) {
         <span className="dash-header__date">{today}</span>
         <ExportButton exportacion={exportacion} />
         {tieneRol("admin") && (
-          <>
-            <button type="button" className="dash-header__accion" onClick={() => setPanel("importar")}>
-              Importar
-            </button>
-            <button type="button" className="dash-header__accion" onClick={() => setPanel("usuarios")}>
-              Usuarios
-            </button>
-          </>
+          <button type="button" className="dash-header__accion" onClick={() => setPanel("importar")}>
+            Importar
+          </button>
         )}
         <MenuPerfil onCambiarPassword={() => setPanel("password")} />
       </div>
@@ -67,7 +61,6 @@ export default function Header({ exportacion }) {
           onImportado={() => setTimeout(() => window.location.reload(), 1500)}
         />
       )}
-      {panel === "usuarios" && <AdminUsuarios onCerrar={() => setPanel(null)} />}
       {panel === "password" && (
         <CambiarPassword onCerrar={() => setPanel(null)} />
       )}
