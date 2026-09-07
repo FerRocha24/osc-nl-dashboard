@@ -4,17 +4,11 @@ import ExportButton from "./ExportButton";
 import AdminUsuarios from "./AdminUsuarios";
 import ImportarPadron from "./ImportarPadron";
 import CambiarPassword from "./CambiarPassword";
-import { cerrarSesion, obtenerSesion, tieneRol } from "../api/auth";
+import MenuPerfil from "./MenuPerfil";
+import { tieneRol } from "../api/auth";
 import "./Header.css";
 
-const NOMBRE_ROL = {
-  admin: "Administrador",
-  revisor: "Revisor",
-  consulta: "Consulta",
-};
-
 export default function Header({ exportacion }) {
-  const sesion = obtenerSesion();
   const [panel, setPanel] = useState(null);
   const today = new Date().toLocaleDateString("es-MX", {
     day: "numeric",
@@ -51,27 +45,18 @@ export default function Header({ exportacion }) {
 
       <div className="dash-header__right">
         <span className="dash-header__date">{today}</span>
-        <div className="dash-header__persona">
-          <span className="dash-header__user">{sesion?.nombre ?? "Sesión activa"}</span>
-          <span className="dash-header__rol">{NOMBRE_ROL[sesion?.rol] ?? ""}</span>
-        </div>
         <ExportButton exportacion={exportacion} />
         {tieneRol("admin") && (
           <>
-            <button type="button" className="dash-header__salir" onClick={() => setPanel("importar")}>
+            <button type="button" className="dash-header__accion" onClick={() => setPanel("importar")}>
               Importar
             </button>
-            <button type="button" className="dash-header__salir" onClick={() => setPanel("usuarios")}>
+            <button type="button" className="dash-header__accion" onClick={() => setPanel("usuarios")}>
               Usuarios
             </button>
           </>
         )}
-        <button type="button" className="dash-header__salir" onClick={() => setPanel("password")}>
-          Contraseña
-        </button>
-        <button type="button" className="dash-header__salir" onClick={cerrarSesion}>
-          Salir
-        </button>
+        <MenuPerfil onCambiarPassword={() => setPanel("password")} />
       </div>
 
       {panel === "importar" && (

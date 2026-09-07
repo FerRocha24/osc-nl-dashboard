@@ -109,8 +109,8 @@
   }
 }
 
-/* Cerrar sesión: discreto, no compite con "Exportar reporte". */
-.dash-header__salir {
+/* Acciones de administración: discretas, no compiten con "Exportar reporte". */
+.dash-header__accion {
   padding: 6px 11px;
   font-family: var(--fuente-texto);
   font-size: 12.5px;
@@ -123,22 +123,8 @@
   white-space: nowrap;
 }
 
-.dash-header__salir:hover {
-  color: var(--color-peligro);
-  border-color: var(--color-peligro);
+.dash-header__accion:hover {
+  color: var(--color-primario);
+  border-color: var(--color-primario);
 }
 
-/* Identidad de quien inició sesión: nombre arriba, rol debajo en pequeño. */
-.dash-header__persona {
-  display: flex;
-  flex-direction: column;
-  line-height: 1.25;
-  text-align: right;
-}
-
-.dash-header__rol {
-  font-size: 10.5px;
-  letter-spacing: 0.03em;
-  text-transform: uppercase;
-  color: var(--color-texto-suave);
-}
