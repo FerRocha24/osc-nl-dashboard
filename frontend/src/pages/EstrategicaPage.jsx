@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { lazy, Suspense, useState } from "react";
 import {
   PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend,
   BarChart, Bar, XAxis, YAxis, CartesianGrid, LineChart, Line,
@@ -9,6 +9,8 @@ import BigNumberCard from "../components/BigNumberCard";
 import ChartPanel from "../components/ChartPanel";
 import Estado from "../components/EstadoPanel";
 import MapaMunicipios from "../components/MapaMunicipios";
+import PillsMapa from "../components/PillsMapa";
+import { Cargando } from "../components/EstadoPanel";
 import { useApi } from "../api/client";
 import "./Pages.css";
 
@@ -21,8 +23,18 @@ const RUBRO_COLORS = [
 
 const FILTROS_INICIALES = { municipio: "Todos", categoria: "Todos" };
 
+// Leaflet y su CSS pesan ~45 KB comprimidos. Se cargan solo si alguien abre el
+// mapa de ubicaciones; quien se queda en el de calor no los baja.
+const MapaUbicaciones = lazy(() => import("../components/MapaUbicaciones"));
+
+const MAPAS = [
+  { valor: "calor", etiqueta: "Mapa de calor" },
+  { valor: "puntos", etiqueta: "Ubicaciones" },
+];
+
 export default function EstrategicaPage() {
   const [filtros, setFiltros] = useState(FILTROS_INICIALES);
+  const [mapa, setMapa] = useState("calor");
 
   // Todos los paneles comparten el mismo filtro, así que la vista completa
   // habla del mismo subconjunto del padrón.
@@ -197,14 +209,25 @@ export default function EstrategicaPage() {
         </section>
 
         <section className="page__grid page__grid--two">
-          <ChartPanel title="Distribución geográfica de OSC">
-            <MapaMunicipios
-              datos={serieDensidad}
-              cargando={densidad.cargando}
-              error={densidad.error}
-              onReintentar={densidad.recargar}
-              onSeleccionar={alternarMunicipio}
-            />
+          <ChartPanel
+            title="Distribución geográfica de OSC"
+            acciones={
+              <PillsMapa valor={mapa} onCambiar={setMapa} opciones={MAPAS} />
+            }
+          >
+            {mapa === "calor" ? (
+              <MapaMunicipios
+                datos={serieDensidad}
+                cargando={densidad.cargando}
+                error={densidad.error}
+                onReintentar={densidad.recargar}
+                onSeleccionar={alternarMunicipio}
+              />
+            ) : (
+              <Suspense fallback={<Cargando alto={320} />}>
+                <MapaUbicaciones filtros={filtros} />
+              </Suspense>
+            )}
           </ChartPanel>
 
           <ChartPanel title="Municipios con más organizaciones">

@@ -5,11 +5,19 @@
   padding: 20px 22px 12px;
 }
 
+.chart-panel__encabezado {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
 .chart-panel__title {
   font-size: 14px;
   font-weight: 600;
   color: var(--color-texto);
-  margin-bottom: 14px;
 }
 
 .chart-panel__body {
