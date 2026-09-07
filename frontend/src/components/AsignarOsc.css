@@ -1,0 +1,69 @@
+.asignar {
+  padding: 18px 0;
+  border-bottom: 1px solid var(--color-borde);
+}
+
+.asignar h3 {
+  margin: 0 0 10px;
+  font-family: var(--fuente-titulos);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--color-primario);
+}
+
+.asignar__campo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--color-texto-suave);
+}
+
+.asignar__campo select {
+  padding: 8px 10px;
+  font-family: var(--fuente-texto);
+  font-size: 13px;
+  color: var(--color-texto);
+  background: var(--color-fondo);
+  border: 1px solid var(--color-borde);
+  border-radius: 8px;
+}
+
+.asignar__campo select:focus {
+  outline: 2px solid var(--color-primario);
+  outline-offset: 1px;
+  border-color: transparent;
+}
+
+.asignar__texto,
+.asignar__meta {
+  margin: 6px 0 0;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--color-texto-suave);
+}
+
+.asignar__texto { margin-top: 0; font-size: 13px; color: var(--color-texto); }
+
+.asignar__vacio {
+  margin: 0;
+  padding: 9px 11px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #8A5A02;
+  background: #FBF0DC;
+  border-radius: 8px;
+}
+
+.asignar__error {
+  margin: 10px 0 0;
+  padding: 8px 11px;
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: var(--color-peligro);
+  background: #FBEDEB;
+  border-radius: 8px;
+}

@@ -1,8 +1,9 @@
 import { useApi } from "../api/client";
-import "./FilterBar.css";
+import { obtenerSesion } from "../api/auth";
 import {
   ESTATUS_DOCUMENTAL, RESOLUCIONES, ESTATUS_OPERACION,
 } from "./estatusDocumental";
+import "./FilterBar.css";
 
 // Las opciones se piden a filtros.php, que las saca de
 // los municipios, rubros y categorías que realmente existen en la base.
@@ -28,6 +29,19 @@ const CAMPOS = {
   estatus:   { etiqueta: "Expediente", lista: (o) => o.estatus },
   resolucion: { etiqueta: "Resolución", lista: (o) => o.resoluciones },
   operacion: { etiqueta: "Operación", lista: (o) => o.operaciones },
+  // Este no viene del backend: son dos preguntas fijas ("¿qué me toca?" y
+  // "¿qué está sin repartir?"), y no hace falta listar a todo el personal.
+  asignado: {
+    etiqueta: "Responsable",
+    lista: () => ["Todos", "sin"],
+    // El id de la sesión se resuelve al vuelo: el valor guardado en el filtro
+    // tiene que ser el id real, para que el backend lo entienda.
+    opciones: (sesion) => [
+      { valor: "Todos", etiqueta: "Todos" },
+      { valor: "sin", etiqueta: "Sin asignar" },
+      ...(sesion?.id ? [{ valor: String(sesion.id), etiqueta: "Asignadas a mí" }] : []),
+    ],
+  },
 };
 
 export default function FilterBar({
@@ -57,7 +71,11 @@ export default function FilterBar({
       {campos.map((campo) => {
         const def = CAMPOS[campo];
         if (!def) return null;
-        const lista = def.lista(opciones) ?? ["Todos"];
+        // Un campo puede definir sus opciones con etiqueta propia, cuando el
+        // valor que viaja al backend no es el texto que se lee en pantalla.
+        const items = def.opciones
+          ? def.opciones(obtenerSesion())
+          : (def.lista(opciones) ?? ["Todos"]).map((v) => ({ valor: v, etiqueta: v }));
         return (
           <div className="filter-bar__group" key={campo}>
             <label className="filter-bar__label" htmlFor={`filtro-${campo}`}>
@@ -71,8 +89,8 @@ export default function FilterBar({
                 ? { value: valores?.[campo] ?? "Todos", onChange: cambiar(campo) }
                 : { defaultValue: "Todos" })}
             >
-              {lista.map((opcion) => (
-                <option key={opcion} value={opcion}>{opcion}</option>
+              {items.map((o) => (
+                <option key={o.valor} value={o.valor}>{o.etiqueta}</option>
               ))}
             </select>
           </div>

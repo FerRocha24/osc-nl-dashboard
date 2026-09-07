@@ -181,3 +181,85 @@ function aNumero(mixed $valor, bool $entero = false): int|float|null
     }
     return $entero ? (int) $valor : round((float) $valor, 2);
 }
+
+/**
+ * Filtros de la tabla del padrón, a partir de un arreglo de valores.
+ *
+ * Vive aquí y no dentro de osc.php porque la asignación por lote tiene que usar
+ * EXACTAMENTE los mismos criterios: si "lo que asigno" no fuera sin ambigüedad
+ * "lo que estoy viendo", una asignación masiva podría tocar organizaciones que
+ * nunca aparecieron en pantalla.
+ *
+ * Devuelve [$where, $having, $params]. El estatus documental sale de un
+ * agregado sobre Documentacion, así que va en HAVING y obliga a que quien use
+ * esto agrupe por organización.
+ *
+ * "Todos" y la cadena vacía equivalen a no filtrar, que es lo que manda el
+ * FilterBar del frontend.
+ */
+function filtrosPadron(array $valores): array
+{
+    $tomar = static function (string $clave) use ($valores): ?string {
+        $v = $valores[$clave] ?? null;
+        if (!is_string($v)) return null;
+        $v = trim($v);
+        return ($v === '' || $v === 'Todos') ? null : $v;
+    };
+
+    $condiciones = [];
+    $params      = [];
+
+    if (($municipio = $tomar('municipio')) !== null) {
+        $condiciones[] = 'm.nombre_municipio = :municipio';
+        $params[':municipio'] = $municipio;
+    }
+    if (($rubro = $tomar('rubro')) !== null) {
+        $condiciones[] = 'o.rubro = :rubro';
+        $params[':rubro'] = $rubro;
+    }
+    if (($resolucion = $tomar('resolucion')) !== null) {
+        if (!in_array($resolucion, ['Pendiente', 'Aceptada', 'Denegada'], true)) {
+            responderError("El parámetro 'resolucion' debe ser Pendiente, Aceptada o Denegada.", 422);
+        }
+        $condiciones[] = 'o.estatus_revision = :resolucion';
+        $params[':resolucion'] = $resolucion;
+    }
+    if (($operacion = $tomar('operacion')) !== null) {
+        if (!in_array($operacion, ESTATUS_OPERACION, true)) {
+            responderError("El parámetro 'operacion' no es un estatus válido del padrón.", 422);
+        }
+        $condiciones[] = 'o.estatus_operacion = :operacion';
+        $params[':operacion'] = $operacion;
+    }
+    if (($asignado = $tomar('asignado')) !== null) {
+        if ($asignado === 'sin') {
+            $condiciones[] = 'o.asignado_a_id IS NULL';
+        } elseif (preg_match('/^\d+$/', $asignado)) {
+            $condiciones[] = 'o.asignado_a_id = :asignado';
+            $params[':asignado'] = (int) $asignado;
+        } else {
+            responderError("El parámetro 'asignado' debe ser un id de cuenta o 'sin'.", 422);
+        }
+    }
+    if (($busqueda = $tomar('q')) !== null) {
+        // Tres marcadores distintos y no :q repetido: con consultas preparadas
+        // nativas no se puede reutilizar el mismo nombre.
+        $condiciones[] = '(o.razon_social LIKE :q1 OR o.siglas LIKE :q2 OR o.rfc LIKE :q3)';
+        $params[':q1'] = $params[':q2'] = $params[':q3'] = '%' . $busqueda . '%';
+    }
+
+    $having = '';
+    if (($estatus = $tomar('estatus')) !== null) {
+        if (!in_array($estatus, ['Completo', 'Pendiente', 'Vencido', 'Rechazado'], true)) {
+            responderError("El parámetro 'estatus' debe ser Completo, Pendiente, Vencido o Rechazado.", 422);
+        }
+        $having = 'HAVING estatus_documental = :estatus';
+        $params[':estatus'] = $estatus;
+    }
+
+    return [
+        $condiciones ? 'WHERE ' . implode(' AND ', $condiciones) : '',
+        $having,
+        $params,
+    ];
+}

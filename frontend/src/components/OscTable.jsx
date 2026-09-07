@@ -109,6 +109,7 @@ export default function OscTable({
               <th>Operación</th>
               <th>Expediente</th>
               <th>Resolución</th>
+              <th>Responsable</th>
               <th>Última actualización</th>
             </tr>
           </thead>
@@ -143,6 +144,9 @@ export default function OscTable({
                   />
                 </td>
                 <td><ResolucionBadge resolucion={row.estatus_revision ?? "Pendiente"} /></td>
+                <td className="osc-table__responsable">
+                  {row.asignado_a ?? <span className="osc-table__sin">Sin asignar</span>}
+                </td>
                 <td>{formatearFecha(row.ultima_actualizacion)}</td>
               </tr>
             ))}

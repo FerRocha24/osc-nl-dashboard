@@ -1,7 +1,7 @@
 // Cliente HTTP del dashboard: centraliza la URL base del backend de PHP,
 // el manejo de errores y el hook de carga que usan las dos vistas.
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 import { cerrarSesion, guardarSesion, obtenerToken } from "./auth";
 
 // La URL base viene del .env de Vite (VITE_API_URL). Se le quita la diagonal
@@ -155,6 +155,10 @@ export async function iniciarSesion(usuario, password) {
 export function useApi(endpoint, params = {}, valorInicial = null) {
   const paramsSerializados = JSON.stringify(params);
   const [intento, setIntento] = useState(0);
+  // En una ref y no como dependencia: el valor inicial suele escribirse como
+  // literal en la llamada, así que es un objeto nuevo en cada render y haría
+  // que el efecto se repitiera sin parar.
+  const valorInicialRef = useRef(valorInicial);
   const recargar = useCallback(() => setIntento((n) => n + 1), []);
 
   // Identifica de forma única la petición que corresponde al render actual.
@@ -168,6 +172,14 @@ export function useApi(endpoint, params = {}, valorInicial = null) {
   });
 
   useEffect(() => {
+    // endpoint nulo = no hay nada que pedir. Sirve para peticiones que solo
+    // aplican a ciertos roles: sin esto habría que montar el componente a
+    // medias, o pedir algo que el backend va a rechazar con 403.
+    if (!endpoint) {
+      setResultado({ clave, datos: valorInicialRef.current, error: null });
+      return;
+    }
+
     const controlador = new AbortController();
     let vigente = true;
 

@@ -4,6 +4,7 @@ import Estado from "./EstadoPanel";
 import Expediente from "./Expediente";
 import ResolucionOsc from "./ResolucionOsc";
 import OperacionOsc from "./OperacionOsc";
+import AsignarOsc from "./AsignarOsc";
 import "./OscDetalle.css";
 
 function Campo({ etiqueta, children }) {
@@ -132,6 +133,12 @@ export default function OscDetalle({ idOsc, onCerrar }) {
                     quien abre la ficha quiere saber primero en qué quedó. */}
                 <section className="detalle__seccion">
                   <OperacionOsc osc={osc} onGuardado={recargar} />
+                </section>
+
+                {/* Antes de la resolución: primero se sabe de quién es el
+                    expediente, luego en qué quedó. */}
+                <section className="detalle__seccion">
+                  <AsignarOsc osc={osc} onAsignado={recargar} />
                 </section>
 
                 <section className="detalle__seccion">

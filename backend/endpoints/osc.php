@@ -8,6 +8,7 @@
 //   ?estatus=Vencido         estatus documental (Completo|Pendiente|Vencido|Rechazado)
 //   ?resolucion=Denegada     resolución del Registro (Pendiente|Aceptada|Denegada)
 //   ?operacion=Baja          estatus de operación del padrón de la Secretaría
+//   ?asignado=3|sin          responsable de la revisión (id de cuenta, o 'sin')
 //   ?q=manos                 búsqueda parcial en razón social, siglas o RFC
 //   ?limite=100&pagina=1     paginación (limite máx. 500)
 //
@@ -17,64 +18,14 @@
 require_once __DIR__ . '/../config/api.php';
 
 ejecutar(function () use ($pdo) {
-    $municipio = parametro('municipio');
-    $rubro     = parametro('rubro');
-    $estatus   = parametro('estatus');
-    $resolucion = parametro('resolucion');
-    $operacion  = parametro('operacion');
-    $busqueda  = parametro('q');
-
     $limite  = parametroEntero('limite', 100, 1, 500);
     $pagina  = parametroEntero('pagina', 1, 1, 100000);
     $desplaz = ($pagina - 1) * $limite;
 
-    // --- WHERE dinámico, siempre con marcadores (nunca concatenando valores) ---
-    $condiciones = [];
-    $params      = [];
-
-    if ($municipio !== null) {
-        $condiciones[] = 'm.nombre_municipio = :municipio';
-        $params[':municipio'] = $municipio;
-    }
-    if ($rubro !== null) {
-        $condiciones[] = 'o.rubro = :rubro';
-        $params[':rubro'] = $rubro;
-    }
-    // La resolución es una columna de OSC, no un agregado: va en el WHERE y no
-    // en el HAVING, así aprovecha el índice idx_estatus_revision.
-    if ($resolucion !== null) {
-        if (!in_array($resolucion, ['Pendiente', 'Aceptada', 'Denegada'], true)) {
-            responderError("El parámetro 'resolucion' debe ser Pendiente, Aceptada o Denegada.", 422);
-        }
-        $condiciones[] = 'o.estatus_revision = :resolucion';
-        $params[':resolucion'] = $resolucion;
-    }
-    // Estatus de operación tal como viene del padrón. Es columna de OSC, no un
-    // agregado, así que va en el WHERE.
-    if ($operacion !== null) {
-        if (!in_array($operacion, ESTATUS_OPERACION, true)) {
-            responderError("El parámetro 'operacion' no es un estatus válido del padrón.", 422);
-        }
-        $condiciones[] = 'o.estatus_operacion = :operacion';
-        $params[':operacion'] = $operacion;
-    }
-    if ($busqueda !== null) {
-        // Se usan tres marcadores distintos (no :q repetido) porque con
-        // consultas preparadas nativas no se puede reutilizar el mismo nombre.
-        $condiciones[] = '(o.razon_social LIKE :q1 OR o.siglas LIKE :q2 OR o.rfc LIKE :q3)';
-        $params[':q1'] = $params[':q2'] = $params[':q3'] = '%' . $busqueda . '%';
-    }
-    $where = $condiciones ? 'WHERE ' . implode(' AND ', $condiciones) : '';
-
-    // El estatus documental es un agregado, así que se filtra con HAVING.
-    $having = '';
-    if ($estatus !== null) {
-        if (!in_array($estatus, ['Completo', 'Pendiente', 'Vencido', 'Rechazado'], true)) {
-            responderError("El parámetro 'estatus' debe ser Completo, Pendiente, Vencido o Rechazado.", 422);
-        }
-        $having = 'HAVING estatus_documental = :estatus';
-        $params[':estatus'] = $estatus;
-    }
+    // La construcción de filtros vive en api.php porque la asignación por lote
+    // tiene que usar exactamente los mismos criterios: si no, se podrían
+    // asignar organizaciones que nunca aparecieron en pantalla.
+    [$where, $having, $params] = filtrosPadron($_GET);
 
     $donataria = SQL_DONATARIA_VIGENTE;
     $estatusDoc = SQL_ESTATUS_DOCUMENTAL;
@@ -115,12 +66,16 @@ ejecutar(function () use ($pdo) {
             $donataria  AS donataria_vigente,
             $estatusDoc AS estatus_documental,
             $aprobados  AS documentos_aprobados,
+            o.asignado_a_id,
+            u.nombre AS asignado_a,
             MAX(d.fecha_entrega) AS ultima_actualizacion
         FROM OSC o
         LEFT JOIN Municipio     m ON m.id_municipio = o.id_municipio
         LEFT JOIN Documentacion d ON d.id_osc = o.id_osc
+        LEFT JOIN Usuario       u ON u.id_usuario = o.asignado_a_id
         $where
-        GROUP BY o.id_osc, m.nombre_municipio, o.estatus_revision, o.estatus_operacion
+        GROUP BY o.id_osc, m.nombre_municipio, o.estatus_revision,
+                 o.estatus_operacion, o.asignado_a_id, u.nombre
         $having
         ORDER BY o.razon_social ASC
         LIMIT :limite OFFSET :desplaz";
@@ -139,6 +94,7 @@ ejecutar(function () use ($pdo) {
         $fila['id_osc'] = (int) $fila['id_osc'];
         $fila['donataria_vigente'] = (bool) $fila['donataria_vigente'];
         $fila['documentos_aprobados'] = (int) $fila['documentos_aprobados'];
+        $fila['asignado_a_id'] = $fila['asignado_a_id'] === null ? null : (int) $fila['asignado_a_id'];
         return $fila;
     }, $stmt->fetchAll());
 

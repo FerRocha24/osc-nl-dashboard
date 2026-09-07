@@ -37,6 +37,7 @@ ejecutar(function () use ($pdo) {
             o.registrada_jbpnl,
             o.estatus_revision, o.motivo_revision,
             o.fecha_revision, o.revisado_por,
+            o.asignado_a_id, ua.nombre AS asignado_a, o.fecha_asignacion,
             o.estatus_operacion, o.observaciones_estatus,
             o.ultima_fecha_visita, o.ultima_visita_observacion,
             $donataria  AS donataria_vigente,
@@ -46,11 +47,13 @@ ejecutar(function () use ($pdo) {
         FROM OSC o
         LEFT JOIN Municipio     m ON m.id_municipio = o.id_municipio
         LEFT JOIN Documentacion d ON d.id_osc = o.id_osc
+        LEFT JOIN Usuario      ua ON ua.id_usuario = o.asignado_a_id
         WHERE o.id_osc = :id
         GROUP BY o.id_osc, m.nombre_municipio,
                  o.estatus_revision, o.motivo_revision,
                  o.fecha_revision, o.revisado_por,
-                 o.estatus_operacion, o.observaciones_estatus,
+                 o.asignado_a_id, ua.nombre AS asignado_a, o.fecha_asignacion,
+            o.estatus_operacion, o.observaciones_estatus,
                  o.ultima_fecha_visita, o.ultima_visita_observacion");
     $stmt->bindValue(':id', $id, PDO::PARAM_INT);
     $stmt->execute();
@@ -62,6 +65,7 @@ ejecutar(function () use ($pdo) {
 
     $osc['id_osc'] = (int) $osc['id_osc'];
     $osc['documentos_aprobados'] = (int) $osc['documentos_aprobados'];
+    $osc['asignado_a_id'] = $osc['asignado_a_id'] === null ? null : (int) $osc['asignado_a_id'];
     $osc['documentos_requeridos'] = count(DOCUMENTOS_REQUERIDOS);
     $osc['donataria_vigente'] = (bool) $osc['donataria_vigente'];
     $osc['registrada_jbpnl'] = (bool) $osc['registrada_jbpnl'];

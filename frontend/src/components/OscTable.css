@@ -198,3 +198,13 @@
   .osc-table__pagination { justify-content: flex-start; }
   .osc-table__ir { width: 100%; }
 }
+
+.osc-table__responsable {
+  font-size: 12.5px;
+  white-space: nowrap;
+}
+
+.osc-table__sin {
+  color: var(--color-texto-suave);
+  font-style: italic;
+}
