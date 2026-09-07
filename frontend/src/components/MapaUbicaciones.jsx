@@ -3,6 +3,7 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { useApi } from "../api/client";
 import Estado from "./EstadoPanel";
+import NotaInfo from "./NotaInfo";
 import { CLASE_OPERACION } from "./estatusDocumental";
 import "./MapaUbicaciones.css";
 
@@ -123,6 +124,7 @@ export default function MapaUbicaciones({ filtros, onSeleccionar }) {
   }, [puntos, onSeleccionar]);
 
   const sinCoordenadas = !cargando && !error && puntos.length === 0;
+  const total = datos?.total ?? 0;
 
   return (
     <div className="mapa-ubi">
@@ -131,21 +133,36 @@ export default function MapaUbicaciones({ filtros, onSeleccionar }) {
           {/* El contenedor se mantiene montado aunque no haya puntos: Leaflet
               necesita el nodo para existir, y desmontarlo obligaría a recrear
               el mapa cada vez que un filtro se queda sin resultados. */}
-          <div className="mapa-ubi__lienzo" ref={contenedor} />
-
-          {sinCoordenadas ? (
-            <p className="mapa-ubi__vacio">
-              Ninguna organización tiene coordenadas todavía. Las trae el padrón
-              de la Secretaría en las columnas <code>latitud</code> y{" "}
-              <code>longitud</code>; se llenan al importar el archivo completo.
-            </p>
-          ) : (
-            <p className="mapa-ubi__pie">
-              Se muestran {puntos.length.toLocaleString("es-MX")} de{" "}
-              {(datos?.total ?? 0).toLocaleString("es-MX")} organizaciones.
-              El resto todavía no tiene coordenada en el padrón.
-            </p>
-          )}
+          <div className="mapa-ubi__lienzo" ref={contenedor}>
+            {/* La cuenta va encima del mapa y el porqué detrás del signo: un
+                párrafo fijo debajo se deja de leer a la tercera vez, pero la
+                cifra sí hace falta a la vista para no creer que faltan puntos
+                por un error. */}
+            <div className="mapa-ubi__aviso">
+              <span>
+                {sinCoordenadas
+                  ? "Sin ubicaciones"
+                  : `${puntos.length.toLocaleString("es-MX")} de ${total.toLocaleString("es-MX")}`}
+              </span>
+              <NotaInfo etiqueta="Por qué faltan ubicaciones">
+                {sinCoordenadas ? (
+                  <>
+                    Ninguna organización tiene coordenadas todavía. Las trae el
+                    padrón de la Secretaría en las columnas <code>latitud</code>{" "}
+                    y <code>longitud</code>, y se llenan al importar el archivo
+                    completo.
+                  </>
+                ) : (
+                  <>
+                    Solo se dibujan las organizaciones con coordenada en el
+                    padrón. Las {(total - puntos.length).toLocaleString("es-MX")}{" "}
+                    restantes no la tienen capturada; aparecerán en cuanto se
+                    importe un archivo que la incluya.
+                  </>
+                )}
+              </NotaInfo>
+            </div>
+          </div>
         </>
       </Estado>
     </div>
