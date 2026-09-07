@@ -3,6 +3,7 @@ import { useApi } from "../api/client";
 import Estado from "./EstadoPanel";
 import Expediente from "./Expediente";
 import ResolucionOsc from "./ResolucionOsc";
+import OperacionOsc from "./OperacionOsc";
 import "./OscDetalle.css";
 
 function Campo({ etiqueta, children }) {
@@ -85,12 +86,7 @@ export default function OscDetalle({ idOsc, onCerrar }) {
                     <Campo etiqueta="RFC">{osc.rfc}</Campo>
                     <Campo etiqueta="Fecha de registro">{formatearFecha(osc.fecha_registro)}</Campo>
                     <Campo etiqueta="Estatus documental">{osc.estatus_documental}</Campo>
-                    <Campo etiqueta="Operación">{osc.estatus_operacion}</Campo>
-                    <Campo etiqueta="Observaciones">{osc.observaciones_estatus}</Campo>
-                    <Campo etiqueta="Última visita">
-                      {formatearFecha(osc.ultima_fecha_visita)}
-                    </Campo>
-                    <Campo etiqueta="Nota de la visita">{osc.ultima_visita_observacion}</Campo>
+
                   </dl>
                 </section>
 
@@ -134,6 +130,10 @@ export default function OscDetalle({ idOsc, onCerrar }) {
 
                 {/* La resolución va ANTES del expediente: es la conclusión, y
                     quien abre la ficha quiere saber primero en qué quedó. */}
+                <section className="detalle__seccion">
+                  <OperacionOsc osc={osc} onGuardado={recargar} />
+                </section>
+
                 <section className="detalle__seccion">
                   <ResolucionOsc osc={osc} onResuelto={recargar} />
                 </section>

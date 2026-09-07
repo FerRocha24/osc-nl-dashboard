@@ -1,0 +1,136 @@
+.operacion {
+  padding: 18px 0;
+  border-bottom: 1px solid var(--color-borde);
+}
+
+.operacion h3 {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 0 0 10px;
+  font-family: var(--fuente-titulos);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--color-primario);
+}
+
+.operacion__texto {
+  margin: 0 0 6px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--color-texto);
+}
+
+.operacion__meta {
+  margin: 0;
+  font-size: 11.5px;
+  line-height: 1.45;
+  color: var(--color-texto-suave);
+}
+
+.operacion__editar {
+  margin-top: 12px;
+  padding: 7px 14px;
+  font-family: var(--fuente-texto);
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--color-texto);
+  background: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.operacion__editar:hover {
+  color: var(--color-primario);
+  border-color: var(--color-primario);
+}
+
+.operacion__form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.operacion__form label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--color-texto-suave);
+}
+
+.operacion__form select,
+.operacion__form input,
+.operacion__form textarea {
+  padding: 8px 10px;
+  font-family: var(--fuente-texto);
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--color-texto);
+  background: var(--color-fondo);
+  border: 1px solid var(--color-borde);
+  border-radius: 8px;
+  resize: vertical;
+}
+
+.operacion__form select:focus,
+.operacion__form input:focus,
+.operacion__form textarea:focus {
+  outline: 2px solid var(--color-primario);
+  outline-offset: 1px;
+  border-color: transparent;
+}
+
+/* La advertencia no es decorativa: sin ella, la captura de campo se pierde en
+   la siguiente importación sin que nadie se entere. */
+.operacion__aviso {
+  margin: 0;
+  padding: 9px 11px;
+  font-size: 11.5px;
+  line-height: 1.45;
+  color: #8A5A02;
+  background: #FBF0DC;
+  border-radius: 8px;
+}
+
+.operacion__error {
+  margin: 0;
+  padding: 8px 11px;
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: var(--color-peligro);
+  background: #FBEDEB;
+  border-radius: 8px;
+}
+
+.operacion__acciones {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.operacion__acciones button {
+  padding: 8px 15px;
+  font-family: var(--fuente-texto);
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--color-texto-suave);
+  background: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.operacion__guardar {
+  color: #fff !important;
+  background: var(--color-primario) !important;
+  border-color: var(--color-primario) !important;
+}
+
+.operacion__guardar:hover:not(:disabled) { background: var(--color-primario-oscuro) !important; }
+.operacion__guardar:disabled { opacity: 0.6; cursor: default; }
