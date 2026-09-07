@@ -29,6 +29,10 @@
   color: var(--color-texto);
   background-color: var(--color-fondo);
   min-width: 160px;
+  /* Los <select> nativos se estiran hasta su opción más larga, y hay rubros de
+     60 caracteres: sin tope, ese solo campo empujaba a los demás a otro
+     renglón. El valor elegido se recorta, no se pierde. */
+  max-width: 230px;
 }
 
 .filter-bar__select:focus {

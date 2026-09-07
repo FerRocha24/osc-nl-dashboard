@@ -8,7 +8,9 @@ import OscDetalle from "../components/OscDetalle";
 import { pedirJson, useApi } from "../api/client";
 import "./Pages.css";
 
-const FILTROS_INICIALES = { municipio: "Todos", rubro: "Todos", estatus: "Todos" };
+const FILTROS_INICIALES = {
+  municipio: "Todos", rubro: "Todos", estatus: "Todos", resolucion: "Todos",
+};
 const POR_PAGINA = 10;
 
 export default function OperativaPage() {
@@ -47,6 +49,7 @@ export default function OperativaPage() {
           { clave: "municipio", titulo: "Municipio" },
           { clave: "rubro", titulo: "Rubro" },
           { clave: "estatus_documental", titulo: "Estatus documental" },
+          { clave: "estatus_revision", titulo: "Resolución" },
           { clave: "ultima_actualizacion", titulo: "Última actualización" },
           { clave: "actividad_principal", titulo: "Actividad principal" },
         ],
@@ -60,7 +63,11 @@ export default function OperativaPage() {
   return (
     <div className="page">
       <Header exportacion={exportacion} />
-      <FilterBar valores={filtros} onChange={cambiarFiltros} />
+      <FilterBar
+        campos={["municipio", "rubro", "estatus", "resolucion"]}
+        valores={filtros}
+        onChange={cambiarFiltros}
+      />
 
       <main className="page__content">
         <section className="page__alerts">
@@ -81,7 +88,7 @@ export default function OperativaPage() {
               <AlertRevision
                 label="Resultado de la revisión"
                 aceptadas={kpis.datos?.osc_aceptadas ?? 0}
-                rechazadas={kpis.datos?.osc_rechazadas ?? 0}
+                denegadas={kpis.datos?.osc_denegadas ?? 0}
               />
             </>
           </Estado>

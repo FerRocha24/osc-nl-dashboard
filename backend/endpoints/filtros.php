@@ -37,5 +37,8 @@ ejecutar(function () use ($pdo) {
         'rubros'      => array_merge(['Todos'], $rubros),
         'categorias'  => array_merge(['Todos'], $categorias),
         'estatus'     => ['Todos', 'Completo', 'Pendiente', 'Vencido', 'Rechazado'],
+        // Resolución del Registro sobre la OSC completa, distinta del estatus
+        // documental: la firma una persona.
+        'resoluciones' => ['Todos', 'Pendiente', 'Aceptada', 'Denegada'],
     ];
 });

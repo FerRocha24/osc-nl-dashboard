@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useApi } from "../api/client";
 import Estado from "./EstadoPanel";
 import Expediente from "./Expediente";
+import ResolucionOsc from "./ResolucionOsc";
 import "./OscDetalle.css";
 
 function Campo({ etiqueta, children }) {
@@ -124,6 +125,12 @@ export default function OscDetalle({ idOsc, onCerrar }) {
                     )}
                   </section>
                 )}
+
+                {/* La resolución va ANTES del expediente: es la conclusión, y
+                    quien abre la ficha quiere saber primero en qué quedó. */}
+                <section className="detalle__seccion">
+                  <ResolucionOsc osc={osc} onResuelto={recargar} />
+                </section>
 
                 <section className="detalle__seccion">
                   <Expediente idOsc={osc.id_osc} />

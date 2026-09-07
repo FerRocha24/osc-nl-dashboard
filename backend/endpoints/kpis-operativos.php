@@ -7,7 +7,8 @@
 //   porcentaje_completitud_documental % de documentos en estatus 'Completo'
 //   osc_documentacion_incompleta     # de OSC con algún documento no validado
 //                                    (o sin ningún documento cargado)
-//   osc_aceptadas / osc_rechazadas   # de OSC según el resultado de la revisión
+//   osc_aceptadas / osc_denegadas    # de OSC según la resolución del Registro
+//   osc_por_resolver                 # de OSC que nadie ha resuelto todavía
 
 require_once __DIR__ . '/../config/api.php';
 
@@ -53,22 +54,17 @@ ejecutar(function () use ($pdo) {
         ) AS incompletas";
     $oscIncompletas = (int) $pdo->query($sql)->fetchColumn();
 
-    // --- KPI 4: resultado de la revisión ---
-    // Aceptadas y rechazadas se cuentan por OSC, no por documento: lo que se
-    // decide en la ficha es el expediente completo. Se reusa la misma regla
-    // que pinta la columna "Estatus documental" del padrón, para que el número
-    // de la tarjeta y las filas de la tabla no se puedan contradecir.
-    $estatus = SQL_ESTATUS_DOCUMENTAL;
+    // --- KPI 4: resolución del Registro ---
+    // Sale de la columna que firma una persona, NO de los documentos. Que
+    // todos los documentos estén aprobados no significa que la OSC quedó
+    // admitida: no hay una lista cerrada de cuáles debe entregar, así que
+    // "completo" no se puede deducir.
     $sql = "
         SELECT
-            SUM(estatus = 'Completo')   AS aceptadas,
-            SUM(estatus = 'Rechazado')  AS rechazadas
-        FROM (
-            SELECT $estatus AS estatus
-            FROM OSC o
-            LEFT JOIN Documentacion d ON d.id_osc = o.id_osc
-            GROUP BY o.id_osc
-        ) AS por_osc";
+            SUM(estatus_revision = 'Aceptada')  AS aceptadas,
+            SUM(estatus_revision = 'Denegada')  AS denegadas,
+            SUM(estatus_revision = 'Pendiente') AS por_resolver
+        FROM OSC";
     $fila = $pdo->query($sql)->fetch();
 
     return [
@@ -76,7 +72,8 @@ ejecutar(function () use ($pdo) {
         'porcentaje_completitud_documental' => $pctCompletitud,
         'osc_documentacion_incompleta'      => $oscIncompletas,
         'osc_aceptadas'                     => (int) $fila['aceptadas'],
-        'osc_rechazadas'                    => (int) $fila['rechazadas'],
+        'osc_denegadas'                     => (int) $fila['denegadas'],
+        'osc_por_resolver'                  => (int) $fila['por_resolver'],
         // Contexto útil para depurar y para mostrar "23 de 327" en la UI
         'detalle' => [
             'total_osc'            => $totalOsc,

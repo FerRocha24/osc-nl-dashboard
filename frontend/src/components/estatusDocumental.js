@@ -15,3 +15,17 @@ export const CLASE_ESTATUS = {
 
 /** Los cuatro valores del ENUM de Documentacion, para desplegables. */
 export const ESTATUS_DOCUMENTAL = ["Completo", "Pendiente", "Vencido", "Rechazado"];
+
+/**
+ * Resolución del Registro sobre la OSC completa. No se deduce de los
+ * documentos: no hay una lista cerrada de cuáles debe entregar cada
+ * organización, así que "ya está completa" no se puede calcular. La firma
+ * una persona desde la ficha.
+ */
+export const CLASE_RESOLUCION = {
+  Aceptada: "verde",
+  Denegada: "peligro",
+  Pendiente: "neutro",
+};
+
+export const RESOLUCIONES = ["Pendiente", "Aceptada", "Denegada"];

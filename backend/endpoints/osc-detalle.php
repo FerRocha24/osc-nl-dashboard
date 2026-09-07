@@ -34,6 +34,8 @@ ejecutar(function () use ($pdo) {
             o.mision, o.vision, o.objeto_social, o.actividad_principal,
             o.fecha_registro, o.fecha_ultima_publicacion_dof,
             o.registrada_jbpnl,
+            o.estatus_revision, o.motivo_revision,
+            o.fecha_revision, o.revisado_por,
             $donataria  AS donataria_vigente,
             $estatusDoc AS estatus_documental,
             MAX(d.fecha_entrega) AS ultima_actualizacion
@@ -41,7 +43,9 @@ ejecutar(function () use ($pdo) {
         LEFT JOIN Municipio     m ON m.id_municipio = o.id_municipio
         LEFT JOIN Documentacion d ON d.id_osc = o.id_osc
         WHERE o.id_osc = :id
-        GROUP BY o.id_osc, m.nombre_municipio");
+        GROUP BY o.id_osc, m.nombre_municipio,
+                 o.estatus_revision, o.motivo_revision,
+                 o.fecha_revision, o.revisado_por");
     $stmt->bindValue(':id', $id, PDO::PARAM_INT);
     $stmt->execute();
     $osc = $stmt->fetch();

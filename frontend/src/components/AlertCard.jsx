@@ -70,7 +70,7 @@ export function AlertNumber({ label, value }) {
  * Van juntos y no en dos tarjetas porque solo significan algo comparados: 12
  * aceptadas es una noticia distinta si hay 1 rechazada o si hay 40.
  */
-export function AlertRevision({ label, aceptadas, rechazadas }) {
+export function AlertRevision({ label, aceptadas, denegadas }) {
   return (
     <div className="alert-card alert-card--verde">
       <p className="alert-card__label">{label}</p>
@@ -83,9 +83,9 @@ export function AlertRevision({ label, aceptadas, rechazadas }) {
         </div>
         <div className="alert-card__par-lado">
           <span className="alert-card__par-valor alert-card__par-valor--peligro">
-            {rechazadas.toLocaleString("es-MX")}
+            {denegadas.toLocaleString("es-MX")}
           </span>
-          <span className="alert-card__par-etiqueta">Rechazadas</span>
+          <span className="alert-card__par-etiqueta">Denegadas</span>
         </div>
       </div>
     </div>

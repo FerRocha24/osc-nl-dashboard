@@ -1,0 +1,116 @@
+.resolucion {
+  padding: 18px 0;
+  border-bottom: 1px solid var(--color-borde);
+}
+
+.resolucion h3 {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 0 0 10px;
+  font-family: var(--fuente-titulos);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--color-primario);
+}
+
+.resolucion__motivo {
+  margin: 0 0 6px;
+  padding: 9px 11px;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--color-texto);
+  background: #FBEDEB;
+  border-radius: 8px;
+}
+
+.resolucion__firma {
+  margin: 0;
+  font-size: 11.5px;
+  line-height: 1.45;
+  color: var(--color-texto-suave);
+}
+
+.resolucion__error {
+  margin: 10px 0 0;
+  padding: 8px 11px;
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: var(--color-peligro);
+  background: #FBEDEB;
+  border-radius: 8px;
+}
+
+.resolucion__acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.resolucion__acciones button,
+.resolucion__form-acciones button {
+  padding: 7px 14px;
+  font-family: var(--fuente-texto);
+  font-size: 12.5px;
+  font-weight: 600;
+  background: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.resolucion__acciones button:disabled { opacity: 0.5; cursor: default; }
+
+.resolucion__aceptar { color: #1F6B4F; }
+.resolucion__aceptar:hover:not(:disabled) { border-color: #1F6B4F; background: #E8F5EF; }
+
+.resolucion__denegar { color: var(--color-peligro); }
+.resolucion__denegar:hover:not(:disabled) { border-color: var(--color-peligro); background: #FBEDEB; }
+
+.resolucion__reabrir { color: var(--color-texto-suave); }
+.resolucion__reabrir:hover:not(:disabled) { border-color: var(--color-texto-suave); color: var(--color-texto); }
+
+.resolucion__form {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 12px;
+  padding: 12px;
+  background: var(--color-fondo);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio);
+}
+
+.resolucion__form label {
+  font-size: 11.5px;
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--color-texto-suave);
+}
+
+.resolucion__form textarea {
+  padding: 8px 10px;
+  font-family: var(--fuente-texto);
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--color-texto);
+  background: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: 8px;
+  resize: vertical;
+}
+
+.resolucion__form textarea:focus {
+  outline: 2px solid var(--color-primario);
+  outline-offset: 1px;
+  border-color: transparent;
+}
+
+.resolucion__form-acciones {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}

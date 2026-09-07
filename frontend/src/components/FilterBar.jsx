@@ -1,6 +1,6 @@
 import { useApi } from "../api/client";
 import "./FilterBar.css";
-import { ESTATUS_DOCUMENTAL } from "./estatusDocumental";
+import { ESTATUS_DOCUMENTAL, RESOLUCIONES } from "./estatusDocumental";
 
 // Las opciones se piden a filtros.php, que las saca de
 // los municipios, rubros y categorías que realmente existen en la base.
@@ -15,13 +15,15 @@ const OPCIONES_INICIALES = {
   rubros: ["Todos"],
   categorias: ["Todos"],
   estatus: ["Todos", ...ESTATUS_DOCUMENTAL],
+  resoluciones: ["Todos", ...RESOLUCIONES],
 };
 
 const CAMPOS = {
   municipio: { etiqueta: "Municipio", lista: (o) => o.municipios },
   rubro:     { etiqueta: "Rubro", lista: (o) => o.rubros },
   categoria: { etiqueta: "Categoría", lista: (o) => o.categorias },
-  estatus:   { etiqueta: "Estatus", lista: (o) => o.estatus },
+  estatus:   { etiqueta: "Expediente", lista: (o) => o.estatus },
+  resolucion: { etiqueta: "Resolución", lista: (o) => o.resoluciones },
 };
 
 export default function FilterBar({

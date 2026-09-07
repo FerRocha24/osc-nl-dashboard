@@ -1,7 +1,12 @@
 import { useState } from "react";
 import Estado from "./EstadoPanel";
-import { CLASE_ESTATUS } from "./estatusDocumental";
+import { CLASE_ESTATUS, CLASE_RESOLUCION } from "./estatusDocumental";
 import "./OscTable.css";
+
+function ResolucionBadge({ resolucion }) {
+  const clase = CLASE_RESOLUCION[resolucion] ?? "neutro";
+  return <span className={`status-badge status-badge--${clase}`}>{resolucion}</span>;
+}
 
 function StatusBadge({ status }) {
   // El respaldo importa: si mañana se agrega un estatus al ENUM y se olvida
@@ -69,7 +74,11 @@ export default function OscTable({
               <th>Razón Social</th>
               <th>Municipio</th>
               <th>Rubro</th>
-              <th>Estatus documental</th>
+              {/* Dos columnas y no una: el expediente dice cómo va el
+                  papeleo, la resolución dice si la OSC quedó admitida.
+                  Responden preguntas distintas. */}
+              <th>Expediente</th>
+              <th>Resolución</th>
               <th>Última actualización</th>
             </tr>
           </thead>
@@ -96,6 +105,7 @@ export default function OscTable({
                 <td>{row.municipio ?? "—"}</td>
                 <td>{row.rubro ?? "—"}</td>
                 <td><StatusBadge status={row.estatus_documental} /></td>
+                <td><ResolucionBadge resolucion={row.estatus_revision ?? "Pendiente"} /></td>
                 <td>{formatearFecha(row.ultima_actualizacion)}</td>
               </tr>
             ))}
