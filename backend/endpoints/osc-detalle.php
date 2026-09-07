@@ -23,6 +23,7 @@ ejecutar(function () use ($pdo) {
     $donataria  = SQL_DONATARIA_VIGENTE;
     $estatusDoc = SQL_ESTATUS_DOCUMENTAL;
     $categoria  = SQL_CATEGORIA_RUBRO;
+    $aprobados  = sqlDocumentosAprobados();
 
     $stmt = $pdo->prepare("
         SELECT
@@ -40,6 +41,7 @@ ejecutar(function () use ($pdo) {
             o.ultima_fecha_visita, o.ultima_visita_observacion,
             $donataria  AS donataria_vigente,
             $estatusDoc AS estatus_documental,
+            $aprobados  AS documentos_aprobados,
             MAX(d.fecha_entrega) AS ultima_actualizacion
         FROM OSC o
         LEFT JOIN Municipio     m ON m.id_municipio = o.id_municipio
@@ -59,6 +61,8 @@ ejecutar(function () use ($pdo) {
     }
 
     $osc['id_osc'] = (int) $osc['id_osc'];
+    $osc['documentos_aprobados'] = (int) $osc['documentos_aprobados'];
+    $osc['documentos_requeridos'] = count(DOCUMENTOS_REQUERIDOS);
     $osc['donataria_vigente'] = (bool) $osc['donataria_vigente'];
     $osc['registrada_jbpnl'] = (bool) $osc['registrada_jbpnl'];
     // Los correos vienen en un solo campo separados por "; " desde el CSV.

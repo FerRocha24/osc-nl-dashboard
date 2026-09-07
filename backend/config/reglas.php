@@ -197,3 +197,56 @@ const ESTATUS_OPERACION = [
     'Sin evidencia de operación',
     'Baja',
 ];
+
+// --- SUPUESTO 9: qué documentos debe entregar una OSC ----------------------
+// Los 16 del padrón de la Secretaría (columnas D_* del archivo). Es una lista
+// CERRADA, y eso es lo que permite hablar de avance: sin denominador, "12
+// entregados" no dice si falta poco o mucho.
+//
+// Los nombres son exactamente los que escribe el importador (COLUMNAS_DOCUMENTO
+// en importador.php) y los que ofrece el desplegable de carga. Si dejan de
+// coincidir, un documento subido a mano no cuenta para el avance aunque sea el
+// mismo: pasó con "Copia del RFC" contra "RFC / Constancia de situación
+// fiscal".
+const DOCUMENTOS_REQUERIDOS = [
+    'Acta constitutiva',
+    'Copia del RFC',
+    'Comprobante de domicilio',
+    'Identificación del representante legal',
+    'Carta de acreditación bancaria',
+    'Declaración anual',
+    'Dictamen fiscal',
+    'Acreditación como donataria autorizada',
+    'Ficha de visita',
+    'Poder del representante legal',
+    'CLUNI',
+    'Formato de inscripción',
+    'Plan de trabajo anual',
+    'Registro ante Secretaría de Educación',
+    'Registro ante Secretaría de Salud',
+    'Registro ante DIF',
+];
+
+/**
+ * Cuántos de los documentos requeridos tiene aprobados una OSC.
+ *
+ * DISTINCT porque una organización puede subir dos veces el mismo tipo —una
+ * corrección, por ejemplo— y eso no la acerca más a completar el expediente.
+ *
+ * La lista se interpola en el SQL, no se pasa como parámetro: es una constante
+ * del código, no un dato de nadie. Cualquier valor que venga de fuera sigue
+ * yendo con marcadores.
+ */
+function sqlDocumentosAprobados(string $alias = 'd'): string
+{
+    $lista = "'" . implode("', '", array_map(
+        static fn(string $t): string => str_replace("'", "''", $t),
+        DOCUMENTOS_REQUERIDOS
+    )) . "'";
+
+    return "COUNT(DISTINCT CASE
+                WHEN $alias.estatus_validacion = 'Completo'
+                 AND $alias.tipo_documento IN ($lista)
+                THEN $alias.tipo_documento
+            END)";
+}

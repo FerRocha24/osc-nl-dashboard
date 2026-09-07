@@ -104,6 +104,7 @@ export default function OperativaPage() {
           total={padron.datos?.total ?? 0}
           pagina={padron.datos?.pagina ?? pagina}
           limite={POR_PAGINA}
+          requeridos={padron.datos?.documentos_requeridos ?? 16}
           cargando={padron.cargando}
           error={padron.error}
           onReintentar={padron.recargar}

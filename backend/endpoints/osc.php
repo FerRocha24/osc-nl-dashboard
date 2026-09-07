@@ -78,6 +78,7 @@ ejecutar(function () use ($pdo) {
 
     $donataria = SQL_DONATARIA_VIGENTE;
     $estatusDoc = SQL_ESTATUS_DOCUMENTAL;
+    $aprobados  = sqlDocumentosAprobados();
 
     // --- Total de filas que cumplen el filtro (para la paginación) ---
     $sqlTotal = "
@@ -113,6 +114,7 @@ ejecutar(function () use ($pdo) {
             o.fecha_ultima_publicacion_dof,
             $donataria  AS donataria_vigente,
             $estatusDoc AS estatus_documental,
+            $aprobados  AS documentos_aprobados,
             MAX(d.fecha_entrega) AS ultima_actualizacion
         FROM OSC o
         LEFT JOIN Municipio     m ON m.id_municipio = o.id_municipio
@@ -136,10 +138,13 @@ ejecutar(function () use ($pdo) {
     $osc = array_map(static function (array $fila): array {
         $fila['id_osc'] = (int) $fila['id_osc'];
         $fila['donataria_vigente'] = (bool) $fila['donataria_vigente'];
+        $fila['documentos_aprobados'] = (int) $fila['documentos_aprobados'];
         return $fila;
     }, $stmt->fetchAll());
 
     return [
+        // Va una vez y no en cada fila: es el mismo número para todas.
+        'documentos_requeridos' => count(DOCUMENTOS_REQUERIDOS),
         'total'  => $total,
         'pagina' => $pagina,
         'limite' => $limite,

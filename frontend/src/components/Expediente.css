@@ -206,3 +206,35 @@
   border-radius: 7px;
   cursor: pointer;
 }
+
+.expediente__faltantes {
+  margin: 0 0 12px;
+  padding: 9px 11px;
+  font-size: 12px;
+  line-height: 1.5;
+  background: #FBF0DC;
+  border-radius: 8px;
+}
+
+.expediente__faltantes summary {
+  font-weight: 600;
+  color: #8A5A02;
+  cursor: pointer;
+}
+
+.expediente__faltantes ul {
+  margin: 7px 0 0;
+  padding-left: 18px;
+  color: var(--color-texto);
+}
+
+.expediente__completo {
+  margin: 0 0 12px;
+  padding: 9px 11px;
+  font-size: 12px;
+  line-height: 1.5;
+  /* Tono oscuro y no --color-exito: ese verde sobre este fondo da 2.6:1. */
+  color: #1F6B4F;
+  background: #E8F5EF;
+  border-radius: 8px;
+}

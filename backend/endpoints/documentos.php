@@ -71,5 +71,14 @@ ejecutar(function () use ($pdo) {
         return $d;
     }, $stmt->fetchAll());
 
-    return ['total' => $total, 'pagina' => $pagina, 'limite' => $limite, 'documentos' => $documentos];
+    return [
+        'total'      => $total,
+        'pagina'     => $pagina,
+        'limite'     => $limite,
+        'documentos' => $documentos,
+        // El catálogo viaja con el expediente para que el frontend no tenga su
+        // propia copia. Tenerla en dos lados fue justo lo que hizo que un RFC
+        // subido a mano no contara: se llamaba distinto en cada lugar.
+        'requeridos' => DOCUMENTOS_REQUERIDOS,
+    ];
 });

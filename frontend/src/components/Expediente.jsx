@@ -9,15 +9,12 @@ import { CLASE_ESTATUS } from "./estatusDocumental";
 // Expediente digital de una OSC: subir documentos, verlos y decidir si se
 // aprueban o se rechazan.
 
-const TIPOS_SUGERIDOS = [
-  "Acta constitutiva",
-  "RFC / Constancia de situación fiscal",
-  "Comprobante de domicilio",
-  "Identificación del representante legal",
-  "Estados financieros",
-  "Informe anual de actividades",
-  "Otro",
-];
+// Los tipos ya no viven aquí: los manda el backend junto con el expediente.
+//
+// Esta lista era una copia con nombres distintos —decía "RFC / Constancia de
+// situación fiscal" donde el catálogo dice "Copia del RFC"—, así que un RFC
+// subido a mano no contaba nunca para el avance del expediente aunque fuera
+// exactamente el documento pedido.
 
 function formatearTamano(bytes) {
   if (!bytes) return "";
@@ -41,9 +38,17 @@ export default function Expediente({ idOsc }) {
     "documentos.php", { osc: idOsc }, { documentos: [] }
   );
   const documentos = datos?.documentos ?? [];
+  const requeridos = datos?.requeridos ?? [];
+
+  // Falta lo que no tiene un documento APROBADO. Uno pendiente o rechazado no
+  // cierra el requisito: sigue habiendo trabajo por hacer sobre ese punto.
+  const aprobados = new Set(
+    documentos.filter((d) => d.estatus_validacion === "Completo").map((d) => d.tipo_documento)
+  );
+  const faltantes = requeridos.filter((t) => !aprobados.has(t));
   const [error, setError] = useState(null);
 
-  const [tipo, setTipo] = useState(TIPOS_SUGERIDOS[0]);
+  const [tipo, setTipo] = useState("");
   const [subiendo, setSubiendo] = useState(false);
   const [errorSubida, setErrorSubida] = useState(null);
   const inputArchivo = useRef(null);
@@ -63,7 +68,10 @@ export default function Expediente({ idOsc }) {
     try {
       const datos = new FormData();
       datos.append("osc", idOsc);
-      datos.append("tipo_documento", tipo);
+      // El mismo valor efectivo que muestra el desplegable: `tipo` está vacío
+      // hasta que alguien lo cambia, y sin esto se subiría con el tipo en
+      // blanco por no haberlo tocado.
+      datos.append("tipo_documento", tipo || requeridos[0] || "Otro");
       datos.append("archivo", archivo);
       await subirArchivo("documento-subir.php", datos);
       recargar();
@@ -106,15 +114,47 @@ export default function Expediente({ idOsc }) {
     <section className="expediente">
       <h3>
         Expediente digital
-        <span className="expediente__conteo">{documentos.length}</span>
+        <span className="expediente__conteo">
+          {requeridos.length > 0
+            ? `${requeridos.length - faltantes.length} de ${requeridos.length}`
+            : documentos.length}
+        </span>
       </h3>
+
+      {/* La lista de faltantes es la respuesta a la pregunta que se hace quien
+          va a resolver: ¿qué le falta a esta organización? Antes había que
+          deducirla comparando a mano contra el catálogo. */}
+      {requeridos.length > 0 && faltantes.length > 0 && (
+        <details className="expediente__faltantes">
+          <summary>
+            Faltan {faltantes.length} de {requeridos.length} documentos requeridos
+          </summary>
+          <ul>
+            {faltantes.map((t) => <li key={t}>{t}</li>)}
+          </ul>
+        </details>
+      )}
+      {requeridos.length > 0 && faltantes.length === 0 && (
+        <p className="expediente__completo">
+          Los {requeridos.length} documentos requeridos están aprobados.
+        </p>
+      )}
 
       {puedeRevisar && (
       <div className="expediente__subir">
         <label className="expediente__campo">
           <span>Tipo de documento</span>
-          <select value={tipo} onChange={(e) => setTipo(e.target.value)} disabled={subiendo}>
-            {TIPOS_SUGERIDOS.map((t) => <option key={t} value={t}>{t}</option>)}
+          <select
+            // El catálogo llega del backend, así que el primer render no tiene
+            // qué seleccionar todavía.
+            value={tipo || requeridos[0] || "Otro"}
+            onChange={(e) => setTipo(e.target.value)}
+            disabled={subiendo}
+          >
+            {requeridos.map((t) => <option key={t} value={t}>{t}</option>)}
+            {/* "Otro" al final y fuera del catálogo: sirve para lo que la
+                Secretaría pida fuera de los 16, y no cuenta para el avance. */}
+            <option value="Otro">Otro</option>
           </select>
         </label>
         <label className="expediente__boton-archivo">

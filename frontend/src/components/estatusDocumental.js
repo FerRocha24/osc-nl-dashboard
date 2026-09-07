@@ -62,3 +62,17 @@ export const OPERACION_SIN_DATO = "Sin dato";
 export const OPERACION_CORTA = {
   "Sin evidencia de operación": "Sin evidencia",
 };
+
+/**
+ * Color del avance del expediente.
+ *
+ * Cero no se pinta de rojo: hoy son las 779 y una pantalla completa en rojo
+ * deja de comunicar urgencia, solo ruido. El rojo se reserva para lo que
+ * alguien decidió —un documento rechazado—, no para lo que nadie ha hecho aún.
+ */
+export function claseAvance(aprobados, requeridos, estatusDocumental) {
+  if (estatusDocumental === "Rechazado") return "peligro";
+  if (requeridos > 0 && aprobados >= requeridos) return "verde";
+  if (aprobados > 0) return "advertencia";
+  return "neutro";
+}

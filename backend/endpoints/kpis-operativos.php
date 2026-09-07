@@ -4,7 +4,8 @@
 //
 // Devuelve:
 //   porcentaje_donataria_vigente     % de OSC con donataria vigente (ver reglas.php)
-//   porcentaje_completitud_documental % de documentos en estatus 'Completo'
+//   porcentaje_completitud_documental % de los 16 documentos requeridos por OSC
+//                                    que ya están aprobados, sobre todo el padrón
 //   osc_documentacion_incompleta     # de OSC con algún documento no validado
 //                                    (o sin ningún documento cargado)
 //   osc_aceptadas / osc_denegadas    # de OSC según la resolución del Registro
@@ -28,16 +29,28 @@ ejecutar(function () use ($pdo) {
     $pctDonataria  = $totalOsc > 0 ? round($conDonataria * 100 / $totalOsc, 1) : 0.0;
 
     // --- KPI 2: % de completitud documental ---
-    // Proporción de documentos entregados que ya están validados como Completo.
+    // Se divide entre lo REQUERIDO, no entre lo entregado.
+    //
+    // Antes era "aprobados ÷ entregados", y eso daba 100% en cuanto una sola
+    // OSC subía un documento y se lo aprobaban, aunque al padrón entero le
+    // faltara casi todo. Un indicador que dice "completo" cuando falta el 99%
+    // es peor que no tenerlo.
+    //
+    // El denominador es el catálogo cerrado de 16 documentos del padrón por
+    // cada organización registrada.
+    $aprobados = sqlDocumentosAprobados();
     $sql = "
-        SELECT
-            COUNT(*) AS total_documentos,
-            SUM(estatus_validacion = 'Completo') AS documentos_completos
-        FROM Documentacion";
-    $fila = $pdo->query($sql)->fetch();
+        SELECT COALESCE(SUM(aprobados), 0)
+        FROM (
+            SELECT $aprobados AS aprobados
+            FROM OSC o
+            LEFT JOIN Documentacion d ON d.id_osc = o.id_osc
+            GROUP BY o.id_osc
+        ) AS por_osc";
+    $docsCompletos = (int) $pdo->query($sql)->fetchColumn();
 
-    $totalDocs     = (int) $fila['total_documentos'];
-    $docsCompletos = (int) $fila['documentos_completos'];
+    $requeridosPorOsc = count(DOCUMENTOS_REQUERIDOS);
+    $totalDocs = $totalOsc * $requeridosPorOsc;
     $pctCompletitud = $totalDocs > 0 ? round($docsCompletos * 100 / $totalDocs, 1) : 0.0;
 
     // --- KPI 3: # de OSC con documentación incompleta ---
@@ -78,8 +91,9 @@ ejecutar(function () use ($pdo) {
         'detalle' => [
             'total_osc'            => $totalOsc,
             'osc_con_donataria'    => $conDonataria,
-            'total_documentos'     => $totalDocs,
-            'documentos_completos' => $docsCompletos,
+            'documentos_requeridos'      => $totalDocs,
+            'documentos_aprobados'       => $docsCompletos,
+            'requeridos_por_organizacion' => $requeridosPorOsc,
         ],
     ];
 });

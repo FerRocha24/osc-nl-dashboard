@@ -1,8 +1,8 @@
 import { useState } from "react";
 import Estado from "./EstadoPanel";
 import {
-  CLASE_ESTATUS, CLASE_RESOLUCION, CLASE_OPERACION,
-  OPERACION_CORTA, OPERACION_SIN_DATO,
+  CLASE_RESOLUCION, CLASE_OPERACION,
+  OPERACION_CORTA, OPERACION_SIN_DATO, claseAvance,
 } from "./estatusDocumental";
 import "./OscTable.css";
 
@@ -26,11 +26,20 @@ function OperacionBadge({ operacion }) {
   );
 }
 
-function StatusBadge({ status }) {
-  // El respaldo importa: si mañana se agrega un estatus al ENUM y se olvida
-  // aquí, sale una etiqueta ámbar y no una sin color.
-  const clase = CLASE_ESTATUS[status] ?? "advertencia";
-  return <span className={`status-badge status-badge--${clase}`}>{status}</span>;
+function ExpedienteBadge({ aprobados, requeridos, estatus }) {
+  // "12 de 16" y no "Pendiente": el estado suelto no distingue a la que no ha
+  // entregado nada de la que solo debe un papel, y esa diferencia es justo lo
+  // que necesita quien decide si acepta o deniega.
+  const clase = claseAvance(aprobados, requeridos, estatus);
+  const titulo = estatus === "Rechazado"
+    ? "Tiene al menos un documento rechazado"
+    : `${aprobados} de ${requeridos} documentos requeridos, aprobados`;
+  return (
+    <span className={`status-badge status-badge--${clase}`} title={titulo}>
+      {aprobados} de {requeridos}
+      {estatus === "Rechazado" ? " · rechazo" : ""}
+    </span>
+  );
 }
 
 // Las fechas llegan del backend como 'YYYY-MM-DD' o null. Se construyen con
@@ -46,7 +55,7 @@ function formatearFecha(valor) {
 }
 
 export default function OscTable({
-  osc = [], total = 0, pagina = 1, limite = 10,
+  osc = [], total = 0, pagina = 1, limite = 10, requeridos = 16,
   cargando, error, onReintentar, onCambiarPagina, onSeleccionar,
 }) {
   // Lo que se está tecleando en "Ir a la página". Se guarda como texto y no
@@ -126,7 +135,13 @@ export default function OscTable({
                 <td>{row.municipio ?? "—"}</td>
                 <td>{row.rubro ?? "—"}</td>
                 <td><OperacionBadge operacion={row.estatus_operacion} /></td>
-                <td><StatusBadge status={row.estatus_documental} /></td>
+                <td>
+                  <ExpedienteBadge
+                    aprobados={row.documentos_aprobados ?? 0}
+                    requeridos={requeridos}
+                    estatus={row.estatus_documental}
+                  />
+                </td>
                 <td><ResolucionBadge resolucion={row.estatus_revision ?? "Pendiente"} /></td>
                 <td>{formatearFecha(row.ultima_actualizacion)}</td>
               </tr>
