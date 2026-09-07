@@ -69,7 +69,7 @@ export default function Header({ exportacion }) {
       )}
       {panel === "usuarios" && <AdminUsuarios onCerrar={() => setPanel(null)} />}
       {panel === "password" && (
-        <CambiarPassword onListo={() => setPanel(null)} />
+        <CambiarPassword onCerrar={() => setPanel(null)} />
       )}
     </header>
   );

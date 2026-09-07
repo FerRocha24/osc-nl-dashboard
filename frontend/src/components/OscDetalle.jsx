@@ -31,10 +31,11 @@ export default function OscDetalle({ idOsc, onCerrar }) {
   useEffect(() => {
     const alPresionar = (e) => {
       if (e.key !== "Escape") return;
-      // El visor de documentos se monta encima de esta ficha y también
-      // escucha Escape. Sin esta guarda, una sola pulsación cerraría los dos
-      // y la persona perdería la ficha por querer cerrar el documento.
-      if (document.querySelector(".visor")) return;
+      // El visor de documentos y la ventana de cambio de contraseña se montan
+      // encima de esta ficha y también escuchan Escape. Sin esta guarda, una
+      // sola pulsación cerraría los dos y la persona perdería la ficha por
+      // querer cerrar lo de encima.
+      if (document.querySelector(".visor, .cambiar")) return;
       onCerrar();
     };
     document.addEventListener("keydown", alPresionar);
