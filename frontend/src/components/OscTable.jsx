@@ -1,14 +1,18 @@
 import { useState } from "react";
 import Estado from "./EstadoPanel";
 import {
-  CLASE_RESOLUCION, CLASE_OPERACION,
+  CLASE_RESOLUCION, ETIQUETA_RESOLUCION, CLASE_OPERACION,
   OPERACION_CORTA, OPERACION_SIN_DATO, claseAvance,
 } from "./estatusDocumental";
 import "./OscTable.css";
 
 function ResolucionBadge({ resolucion }) {
   const clase = CLASE_RESOLUCION[resolucion] ?? "neutro";
-  return <span className={`status-badge status-badge--${clase}`}>{resolucion}</span>;
+  return (
+    <span className={`status-badge status-badge--${clase}`}>
+      {ETIQUETA_RESOLUCION[resolucion] ?? resolucion}
+    </span>
+  );
 }
 
 function OperacionBadge({ operacion }) {

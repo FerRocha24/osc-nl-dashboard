@@ -1,7 +1,7 @@
 import { useApi } from "../api/client";
 import { obtenerSesion } from "../api/auth";
 import {
-  ESTATUS_DOCUMENTAL, RESOLUCIONES, ESTATUS_OPERACION,
+  ESTATUS_DOCUMENTAL, RESOLUCIONES, ETIQUETA_RESOLUCION, ESTATUS_OPERACION,
 } from "./estatusDocumental";
 import "./FilterBar.css";
 
@@ -27,7 +27,14 @@ const CAMPOS = {
   rubro:     { etiqueta: "Rubro", lista: (o) => o.rubros },
   categoria: { etiqueta: "Categoría", lista: (o) => o.categorias },
   estatus:   { etiqueta: "Expediente", lista: (o) => o.estatus },
-  resolucion: { etiqueta: "Resolución", lista: (o) => o.resoluciones },
+  resolucion: {
+    etiqueta: "Resolución",
+    // El texto cambia pero el valor no: el backend sigue esperando "Pendiente".
+    opciones: () => [
+      { valor: "Todos", etiqueta: "Todos" },
+      ...RESOLUCIONES.map((r) => ({ valor: r, etiqueta: ETIQUETA_RESOLUCION[r] ?? r })),
+    ],
+  },
   operacion: { etiqueta: "Operación", lista: (o) => o.operaciones },
   // Este no viene del backend: son dos preguntas fijas ("¿qué me toca?" y
   // "¿qué está sin repartir?"), y no hace falta listar a todo el personal.

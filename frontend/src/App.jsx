@@ -3,7 +3,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import LoginPage from "./components/LoginPage";
 import CambiarPassword from "./components/CambiarPassword";
 import { Cargando } from "./components/EstadoPanel";
-import { obtenerSesion, obtenerToken, suscribirseASesion } from "./api/auth";
+import { actualizarSesion, obtenerSesion, obtenerToken, suscribirseASesion } from "./api/auth";
+import { pedirJson } from "./api/client";
 import "./styles/global.css";
 
 // Las dos vistas se cargan bajo demanda. Entre las dos arrastran Recharts,
@@ -26,6 +27,34 @@ export default function App() {
   useEffect(() => suscribirseASesion(() => forzarRender((n) => n + 1)), []);
 
   const token = obtenerToken();
+
+  // Se revalida la sesión contra el servidor al arrancar.
+  //
+  // Lo guardado en sessionStorage es una copia hecha al iniciar sesión, y puede
+  // quedar vieja: si el backend cambia lo que devuelve, o alguien entró con una
+  // versión anterior, faltan campos. Sin rol, tieneRol("admin") es false y los
+  // controles de administración desaparecen SIN NINGÚN MENSAJE; la única salida
+  // era cerrar sesión y volver a entrar, adivinando. Pasó de verdad.
+  //
+  // Solo refresca lo que el servidor confirma. Si la petición falla por red no
+  // se toca nada: el cliente ya cierra la sesión solo cuando el token es
+  // rechazado con 401.
+  useEffect(() => {
+    if (!token) return;
+    let vigente = true;
+    pedirJson("sesion.php")
+      .then((s) => {
+        if (!vigente || !s?.activa) return;
+        actualizarSesion({
+          id: s.id ?? null,
+          usuario: s.usuario,
+          nombre: s.nombre,
+          rol: s.rol,
+        });
+      })
+      .catch(() => {});
+    return () => { vigente = false; };
+  }, [token]);
 
   // Se guarda para QUÉ token se preparó el montaje, en vez de un booleano que
   // habría que apagar con otro setState al cerrar sesión.

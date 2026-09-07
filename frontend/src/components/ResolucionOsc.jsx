@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { enviarJson } from "../api/client";
 import { tieneRol } from "../api/auth";
-import { CLASE_RESOLUCION } from "./estatusDocumental";
+import { CLASE_RESOLUCION, ETIQUETA_RESOLUCION } from "./estatusDocumental";
 import "./ResolucionOsc.css";
 
 function formatearFechaHora(valor) {
@@ -55,7 +55,7 @@ export default function ResolucionOsc({ osc, onResuelto }) {
       <h3>
         Resolución del Registro
         <span className={`status-badge status-badge--${CLASE_RESOLUCION[estatus] ?? "neutro"}`}>
-          {estatus}
+          {ETIQUETA_RESOLUCION[estatus] ?? estatus}
         </span>
       </h3>
 
@@ -72,7 +72,7 @@ export default function ResolucionOsc({ osc, onResuelto }) {
         </p>
       ) : (
         <p className="resolucion__firma">
-          Todavía nadie ha resuelto esta organización.
+          Todavía nadie ha revisado esta organización.
         </p>
       )}
 

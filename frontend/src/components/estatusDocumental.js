@@ -31,6 +31,21 @@ export const CLASE_RESOLUCION = {
 export const RESOLUCIONES = ["Pendiente", "Aceptada", "Denegada"];
 
 /**
+ * Cómo se lee cada resolución en pantalla.
+ *
+ * "Pendiente" describía mal el estado inicial: las 779 organizaciones ya están
+ * registradas —el padrón ES la lista de las admitidas—, así que no están
+ * pendientes de admisión. Lo que falta es que alguien revise su expediente
+ * aquí. El valor guardado en la base sigue siendo "Pendiente"; solo cambia el
+ * texto, para no arrastrar una migración por una palabra.
+ */
+export const ETIQUETA_RESOLUCION = {
+  Pendiente: "Sin revisar",
+  Aceptada: "Aceptada",
+  Denegada: "Denegada",
+};
+
+/**
  * Estatus de operación: viene del padrón de la Secretaría (columna
  * EstatusObservacion del Excel) y describe si la organización SIGUE
  * FUNCIONANDO. No es lo mismo que la resolución del Registro: ninguno de sus

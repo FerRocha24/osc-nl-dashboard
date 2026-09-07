@@ -1,11 +1,20 @@
 <?php
-// Crea o actualiza un usuario del tablero. Se corre en el servidor:
+// Crea o actualiza un usuario del tablero:
 //
-//   php backend/deploy/crear-usuario.php
+//   php backend/herramientas/crear-usuario.php
 //
 // Pregunta la contraseña sin mostrarla en pantalla y no la deja en el
-// historial de comandos. Es la forma de crear la primera cuenta cuando la
-// tabla Usuario está vacía.
+// historial de comandos.
+//
+// Es la vía de recuperación cuando nadie puede entrar: la tabla Usuario vacía,
+// un administrador que perdió su contraseña, o una primera cuenta creada mal.
+// Corre en el servidor y también desde cualquier máquina que tenga las
+// credenciales del RDS en un .env.
+//
+// Vive aquí y no en deploy/ justamente para que llegue al servidor: subir.sh
+// excluye deploy/, así que la herramienta de recuperación se quedaba en la
+// máquina de quien desplegó. Servirla por HTTP es inofensivo: el guard de
+// abajo la corta si no se ejecuta desde la línea de comandos.
 
 if (PHP_SAPI !== 'cli') {
     exit("Este script solo se ejecuta desde la línea de comandos.\n");

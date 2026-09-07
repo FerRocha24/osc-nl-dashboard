@@ -198,7 +198,7 @@ funcionar solo en cuanto existe la primera cuenta.
 Para crearla, en el servidor:
 
 ```bash
-php /var/www/osc-api/deploy/crear-usuario.php
+php /var/www/osc-api/herramientas/crear-usuario.php
 ```
 
 Pide los datos y la contraseña sin mostrarla en pantalla. El mismo script sirve
