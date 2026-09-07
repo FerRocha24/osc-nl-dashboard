@@ -35,6 +35,9 @@ export default function AdminUsuarios() {
   };
 
   const activas = usuarios.filter((u) => u.activo).length;
+  // Mientras no haya ninguna cuenta, se entra con el administrador inicial de
+  // las variables de entorno del servidor. Crear la primera cierra esa puerta.
+  const sinCuentas = !cargando && !error && usuarios.length === 0;
 
   return (
     <div className="admin">
@@ -45,9 +48,27 @@ export default function AdminUsuarios() {
             : `${usuarios.length} cuenta${usuarios.length === 1 ? "" : "s"}, ${activas} activa${activas === 1 ? "" : "s"}`}
         </p>
         <button type="button" className="admin__nuevo" onClick={() => setAltaAbierta(true)}>
-          + Añadir usuario
+          {sinCuentas ? "+ Crear la primera cuenta" : "+ Añadir usuario"}
         </button>
       </div>
+
+      {sinCuentas && (
+        <div className="admin__arranque">
+          <h3>Todavía no hay cuentas</h3>
+          <p>
+            Ahora mismo se entra al tablero con el <strong>administrador
+            inicial</strong> configurado en el servidor, que es una cuenta
+            compartida: todas las revisiones que se firmen quedan a su nombre,
+            sin distinguir quién decidió qué.
+          </p>
+          <p>
+            Al crear la primera cuenta, ese acceso compartido{" "}
+            <strong>deja de funcionar</strong> y solo se podrá entrar con las
+            cuentas de esta pantalla. Por eso la primera tiene que ser la tuya y
+            de rol Administrador.
+          </p>
+        </div>
+      )}
 
       {aviso && <p className="admin__aviso" role="status">{aviso}</p>}
       {errorAccion && <p className="admin__error" role="alert">{errorAccion}</p>}
@@ -110,10 +131,16 @@ export default function AdminUsuarios() {
 
       {altaAbierta && (
         <UsuarioNuevo
+          esPrimera={sinCuentas}
           onCerrar={() => setAltaAbierta(false)}
-          onCreado={(nombre) => {
+          onCreado={(nombre, eraLaPrimera) => {
             setAltaAbierta(false);
-            setAviso(`Se creó la cuenta de ${nombre}.`);
+            setAviso(
+              eraLaPrimera
+                ? `Se creó la cuenta de ${nombre}. A partir de ahora se entra con `
+                  + `ella: el administrador inicial del servidor ya no funciona.`
+                : `Se creó la cuenta de ${nombre}.`
+            );
             recargar();
           }}
         />

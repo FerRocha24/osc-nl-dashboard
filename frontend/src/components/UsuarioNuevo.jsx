@@ -5,6 +5,11 @@ import "./UsuarioNuevo.css";
 
 const FORMULARIO_VACIO = { usuario: "", nombre: "", correo: "", rol: "consulta", password: "" };
 
+// La primera cuenta arranca en Administrador y no en Consulta: es la única
+// que puede ser de administrador, y dejarla en el valor de siempre invitaría a
+// crearla mal justo en el momento en que equivocarse cuesta más caro.
+const PRIMERA = { ...FORMULARIO_VACIO, rol: "admin" };
+
 /**
  * Alta de cuenta, en ventana emergente sobre la lista de usuarios.
  *
@@ -12,10 +17,13 @@ const FORMULARIO_VACIO = { usuario: "", nombre: "", correo: "", rol: "consulta",
  * lo de todos los días: con el formulario siempre desplegado, la tabla —que es
  * lo que se viene a ver— quedaba empujada fuera de la pantalla.
  */
-export default function UsuarioNuevo({ onCerrar, onCreado }) {
-  const [form, setForm] = useState(FORMULARIO_VACIO);
+export default function UsuarioNuevo({ onCerrar, onCreado, esPrimera = false }) {
+  const [form, setForm] = useState(esPrimera ? PRIMERA : FORMULARIO_VACIO);
   const [error, setError] = useState(null);
   const [creando, setCreando] = useState(false);
+  // La confirmación solo aplica a la primera: a partir de la segunda, crear una
+  // cuenta ya no cambia cómo se entra al sistema.
+  const [entendido, setEntendido] = useState(false);
 
   useEffect(() => {
     const alPresionar = (e) => {
@@ -35,8 +43,8 @@ export default function UsuarioNuevo({ onCerrar, onCreado }) {
     setError(null);
     setCreando(true);
     try {
-      await enviarJson("usuario-guardar.php", form);
-      onCreado(form.nombre);
+      const r = await enviarJson("usuario-guardar.php", form);
+      onCreado(form.nombre, r?.era_la_primera === true);
     } catch (e) {
       setError(e.message);
       setCreando(false);
@@ -57,7 +65,7 @@ export default function UsuarioNuevo({ onCerrar, onCreado }) {
         onSubmit={crear}
       >
         <header className="alta__encabezado">
-          <h2>Añadir usuario</h2>
+          <h2>{esPrimera ? "Crear la primera cuenta" : "Añadir usuario"}</h2>
           <button type="button" onClick={onCerrar} aria-label="Cerrar">✕</button>
         </header>
 
@@ -84,6 +92,17 @@ export default function UsuarioNuevo({ onCerrar, onCreado }) {
           </label>
         </div>
 
+        {esPrimera && (
+          <p className="alta__advertencia">
+            <strong>Esta cuenta cambia la forma de entrar al tablero.</strong>{" "}
+            Hoy se accede con el administrador inicial definido en el servidor.
+            En cuanto exista una cuenta, ese acceso deja de funcionar y solo se
+            podrá entrar con las cuentas de esta pantalla. Por eso la primera
+            tiene que ser tuya y de rol Administrador: si te equivocas, recuperar
+            el acceso requiere entrar al servidor por SSH.
+          </p>
+        )}
+
         <fieldset className="alta__roles">
           <legend>Rol</legend>
           {ROLES.map((r) => (
@@ -93,6 +112,9 @@ export default function UsuarioNuevo({ onCerrar, onCreado }) {
                 name="rol"
                 value={r.valor}
                 checked={form.rol === r.valor}
+                // En la primera cuenta los demás roles se bloquean aquí y el
+                // backend los rechaza igual: esconder no es proteger.
+                disabled={esPrimera && r.valor !== "admin"}
                 onChange={cambiar("rol")}
               />
               <span>
@@ -108,12 +130,30 @@ export default function UsuarioNuevo({ onCerrar, onCreado }) {
           provisional que defines aquí no se quede puesta.
         </p>
 
+        {esPrimera && (
+          <label className="alta__confirmar">
+            <input
+              type="checkbox"
+              checked={entendido}
+              onChange={(e) => setEntendido(e.target.checked)}
+            />
+            <span>
+              Entiendo que a partir de ahora entraré con esta cuenta, y que
+              guardé la contraseña en un lugar seguro.
+            </span>
+          </label>
+        )}
+
         {error && <p className="alta__error" role="alert">{error}</p>}
 
         <div className="alta__acciones">
           <button type="button" className="alta__cancelar" onClick={onCerrar}>Cancelar</button>
-          <button type="submit" className="alta__guardar" disabled={creando}>
-            {creando ? "Creando…" : "Crear cuenta"}
+          <button
+            type="submit"
+            className="alta__guardar"
+            disabled={creando || (esPrimera && !entendido)}
+          >
+            {creando ? "Creando…" : esPrimera ? "Crear mi cuenta" : "Crear cuenta"}
           </button>
         </div>
       </form>

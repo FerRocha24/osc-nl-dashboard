@@ -202,3 +202,33 @@
 
 .alta__guardar:hover:not(:disabled) { background: var(--color-primario-oscuro); }
 .alta__guardar:disabled { opacity: 0.6; cursor: default; }
+
+/* Solo aparece en la primera cuenta: es el único momento en que crear una
+   cuenta cambia cómo se entra al sistema. */
+.alta__advertencia {
+  margin: 16px 0 0;
+  padding: 10px 12px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #8A5A02;
+  background: #FBF0DC;
+  border-radius: 8px;
+}
+
+.alta__advertencia strong { display: block; margin-bottom: 3px; }
+
+.alta__confirmar {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 12px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--color-texto);
+  cursor: pointer;
+}
+
+.alta__confirmar input {
+  margin-top: 2px;
+  accent-color: var(--color-primario);
+}

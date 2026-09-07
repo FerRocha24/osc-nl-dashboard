@@ -46,6 +46,26 @@ ejecutar(function () use ($pdo) {
             responderError('Faltan el rol o la contraseña.', 422);
         }
 
+        // La PRIMERA cuenta tiene que ser de administrador.
+        //
+        // Mientras la tabla está vacía se puede entrar con el administrador de
+        // arranque (AUTH_USUARIO / AUTH_PASSWORD_HASH). En cuanto existe una
+        // fila, autenticar() deja de aceptarlo. Si esa primera cuenta fuera de
+        // revisor o consulta, nadie podría volver a administrar el sistema
+        // —ni crear cuentas, ni repartir el padrón— y solo se saldría de ahí
+        // entrando por SSH a la base. Es un estado del que la interfaz no
+        // puede recuperarse, así que se impide crearlo.
+        $esLaPrimera = (int) $pdo->query('SELECT COUNT(*) FROM Usuario')->fetchColumn() === 0;
+        if ($esLaPrimera && $rol !== 'admin') {
+            responderError(
+                'La primera cuenta debe ser de administrador: al crearla, el '
+                . 'acceso inicial por variables de entorno deja de funcionar, y '
+                . 'sin un administrador nadie podría volver a entrar a la '
+                . 'administración.',
+                422
+            );
+        }
+
         $existe = $pdo->prepare('SELECT 1 FROM Usuario WHERE usuario = :u');
         $existe->execute([':u' => $usuario]);
         if ($existe->fetchColumn()) {
@@ -62,7 +82,13 @@ ejecutar(function () use ($pdo) {
             ':h' => password_hash($password, PASSWORD_BCRYPT), ':r' => $rol,
         ]);
 
-        return ['id_usuario' => (int) $pdo->lastInsertId(), 'creado' => true];
+        return [
+            'id_usuario' => (int) $pdo->lastInsertId(),
+            'creado'     => true,
+            // Se avisa para que la pantalla pueda decir que a partir de ahora
+            // se entra con esta cuenta y ya no con la de arranque.
+            'era_la_primera' => $esLaPrimera,
+        ];
     }
 
     // ---- Edición ----

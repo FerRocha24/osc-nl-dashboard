@@ -141,3 +141,27 @@
   .admin__tabla { font-size: 12px; }
   .admin__tabla th, .admin__tabla td { padding: 7px 8px; }
 }
+
+.admin__arranque {
+  margin-bottom: 14px;
+  padding: 13px 15px;
+  background: #FBF0DC;
+  border-radius: var(--radio);
+}
+
+.admin__arranque h3 {
+  margin: 0 0 6px;
+  font-family: var(--fuente-titulos);
+  font-size: 13px;
+  font-weight: 600;
+  color: #8A5A02;
+}
+
+.admin__arranque p {
+  margin: 0 0 6px;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--color-texto);
+}
+
+.admin__arranque p:last-child { margin-bottom: 0; }
