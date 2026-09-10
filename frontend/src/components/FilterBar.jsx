@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { useApi } from "../api/client";
 import { obtenerSesion } from "../api/auth";
 import {
@@ -51,10 +52,72 @@ const CAMPOS = {
   },
 };
 
+/**
+ * Campo de búsqueda por nombre.
+ *
+ * Va con estado propio y no directo al filtro: escribir dispararía una
+ * consulta por letra —"fundación" son nueve— y cada una recorre las 779
+ * organizaciones. Se espera a que la persona deje de teclear.
+ */
+function Busqueda({ valor, onBuscar, deshabilitado }) {
+  const [texto, setTexto] = useState(valor ?? "");
+
+  // Si el filtro se limpia desde fuera (el botón "Limpiar"), el campo también.
+  // Se ajusta comparando durante el render y no con un efecto: un efecto que
+  // llama a setState provoca un render extra en cascada, y React recomienda
+  // este patrón justo para adaptar estado a un cambio de prop.
+  const [valorPrevio, setValorPrevio] = useState(valor);
+  if (valor !== valorPrevio) {
+    setValorPrevio(valor);
+    setTexto(valor ?? "");
+  }
+
+  useEffect(() => {
+    if (texto === (valor ?? "")) return;
+    const id = setTimeout(() => onBuscar(texto), 350);
+    return () => clearTimeout(id);
+  }, [texto, valor, onBuscar]);
+
+  return (
+    <div className="filter-bar__group filter-bar__group--busqueda">
+      <label className="filter-bar__label" htmlFor="filtro-q">Buscar</label>
+      <div className="filter-bar__buscador">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2" />
+          <path d="M20 20l-3.5-3.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+        </svg>
+        <input
+          id="filtro-q"
+          type="search"
+          className="filter-bar__input"
+          placeholder="Nombre, siglas o RFC"
+          value={texto}
+          disabled={deshabilitado}
+          onChange={(e) => setTexto(e.target.value)}
+          // Enter busca de inmediato, sin esperar la pausa.
+          onKeyDown={(e) => { if (e.key === "Enter") onBuscar(texto); }}
+        />
+        {texto !== "" && (
+          <button
+            type="button"
+            className="filter-bar__limpiar-busqueda"
+            aria-label="Limpiar la búsqueda"
+            onClick={() => { setTexto(""); onBuscar(""); }}
+          >
+            ✕
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function FilterBar({
   campos = ["municipio", "rubro", "estatus"],
   valores,
   onChange,
+  onBuscar,
+  busqueda,
   mostrarFechas = true,
 }) {
   const { datos, cargando } = useApi("filtros.php", {}, OPCIONES_INICIALES);
@@ -68,13 +131,20 @@ export default function FilterBar({
 
   const limpiar = () => {
     if (!esControlado) return;
-    onChange(Object.fromEntries(campos.map((c) => [c, "Todos"])));
+    // La búsqueda se limpia con los demás: si quedara puesta, "Limpiar"
+    // dejaría la tabla filtrada sin ningún control que lo explique.
+    onChange({ ...Object.fromEntries(campos.map((c) => [c, "Todos"])), q: "" });
   };
 
-  const hayFiltros = campos.some((c) => (valores?.[c] ?? "Todos") !== "Todos");
+  const hayFiltros = campos.some((c) => (valores?.[c] ?? "Todos") !== "Todos")
+    || (valores?.q ?? "") !== "";
 
   return (
     <div className="filter-bar">
+      {onBuscar && (
+        <Busqueda valor={busqueda} onBuscar={onBuscar} deshabilitado={cargando} />
+      )}
+
       {campos.map((campo) => {
         const def = CAMPOS[campo];
         if (!def) return null;

@@ -74,3 +74,56 @@
   border-color: var(--color-primario);
   background: var(--color-primario-claro);
 }
+
+/* La búsqueda va primero y más ancha que un desplegable: es el filtro que se
+   usa cuando ya se sabe a quién se busca, y el resto cuando se explora. */
+.filter-bar__group--busqueda { flex: 0 0 auto; }
+
+.filter-bar__buscador {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 8px 0 10px;
+  background-color: var(--color-fondo);
+  border: 1px solid var(--color-borde);
+  border-radius: 6px;
+  color: var(--color-texto-suave);
+}
+
+.filter-bar__buscador:focus-within {
+  border-color: var(--color-primario);
+  color: var(--color-primario);
+}
+
+.filter-bar__input {
+  width: 200px;
+  padding: 7px 0;
+  font-family: var(--fuente-texto);
+  font-size: 13px;
+  color: var(--color-texto);
+  background: transparent;
+  border: none;
+  outline: none;
+}
+
+/* Safari dibuja su propia cruz en los input de tipo search, que se encimaría
+   con la nuestra. */
+.filter-bar__input::-webkit-search-cancel-button { display: none; }
+
+.filter-bar__limpiar-busqueda {
+  flex-shrink: 0;
+  padding: 2px 4px;
+  font-size: 12px;
+  line-height: 1;
+  color: var(--color-texto-suave);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.filter-bar__limpiar-busqueda:hover { color: var(--color-peligro); }
+
+@media (max-width: 700px) {
+  .filter-bar__group--busqueda { flex: 1 1 100%; }
+  .filter-bar__input { width: 100%; }
+}

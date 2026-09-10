@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import Header from "../components/Header";
 import FilterBar from "../components/FilterBar";
 import { AlertRing, AlertBar, AlertNumber, AlertRevision } from "../components/AlertCard";
@@ -13,6 +13,8 @@ import "./Pages.css";
 const FILTROS_INICIALES = {
   municipio: "Todos", rubro: "Todos", operacion: "Todos",
   estatus: "Todos", resolucion: "Todos", asignado: "Todos",
+  // Vacío = sin buscar. El backend trata "" igual que ausente.
+  q: "",
 };
 const POR_PAGINA = 10;
 
@@ -29,6 +31,13 @@ export default function OperativaPage() {
     setFiltros(nuevos);
     setPagina(1);
   };
+
+  // Buscar también vuelve a la primera página: quedarse en la 8 tras filtrar a
+  // tres resultados dejaría la tabla vacía sin explicación.
+  const buscar = useCallback((texto) => {
+    setFiltros((previos) => (previos.q === texto ? previos : { ...previos, q: texto }));
+    setPagina(1);
+  }, []);
 
   const padron = useApi("osc.php", { ...filtros, pagina, limite: POR_PAGINA });
 
@@ -74,6 +83,8 @@ export default function OperativaPage() {
         campos={["municipio", "rubro", "operacion", "estatus", "resolucion", "asignado"]}
         valores={filtros}
         onChange={cambiarFiltros}
+        busqueda={filtros.q}
+        onBuscar={buscar}
       />
 
       <main className="page__content">
