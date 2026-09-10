@@ -51,5 +51,10 @@ ejecutar(function () use ($pdo) {
         }
     }
 
+    registrarBitacora($pdo, 'osc.ubicacion_fisica', [
+        'id_osc'  => (int) $id,
+        'detalle' => $ubicacion === '' ? 'Se borró la ubicación' : $ubicacion,
+    ]);
+
     return ['id_osc' => (int) $id, 'ubicacion_fisica' => $ubicacion === '' ? null : $ubicacion];
 }, ['POST'], roles: ['admin', 'revisor']);

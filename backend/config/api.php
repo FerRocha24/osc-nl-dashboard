@@ -15,6 +15,7 @@ error_reporting(E_ALL);
 require_once __DIR__ . '/database.php';
 require_once __DIR__ . '/reglas.php';
 require_once __DIR__ . '/auth.php';
+require_once __DIR__ . '/bitacora.php';
 
 // Devuelve la lista de orígenes permitidos para CORS.
 //

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import Logo from "./Logo";
 import ExportButton from "./ExportButton";
+import ReporteMovimientos from "./ReporteMovimientos";
 import ImportarPadron from "./ImportarPadron";
 import CambiarPassword from "./CambiarPassword";
 import MenuPerfil from "./MenuPerfil";
@@ -48,7 +49,7 @@ export default function Header({ exportacion }) {
 
       <div className="dash-header__right">
         <span className="dash-header__date">{today}</span>
-        <ExportButton exportacion={exportacion} />
+        <ExportButton exportacion={exportacion} onReporte={() => setPanel("reporte")} />
         {tieneRol("admin") && (
           <button type="button" className="dash-header__accion" onClick={() => setPanel("importar")}>
             Importar
@@ -64,6 +65,9 @@ export default function Header({ exportacion }) {
           // tenga que darse cuenta de que el tablero quedó desactualizado.
           onImportado={() => setTimeout(() => window.location.reload(), 1500)}
         />
+      )}
+      {panel === "reporte" && (
+        <ReporteMovimientos onCerrar={() => setPanel(null)} />
       )}
       {panel === "password" && (
         <CambiarPassword onCerrar={() => setPanel(null)} />

@@ -20,6 +20,7 @@ ejecutar(function () use ($pdo) {
 
     // ---- A quién se asigna --------------------------------------------------
     $usuarioId = $cuerpo['usuario_id'] ?? null;
+    $cuenta = null;
     if ($usuarioId !== null) {
         if (!is_int($usuarioId) && !preg_match('/^\d+$/', (string) $usuarioId)) {
             responderError('El identificador de la cuenta no es válido.', 422);
@@ -29,7 +30,7 @@ ejecutar(function () use ($pdo) {
         // Se valida el rol aquí y no solo en la pantalla: asignarle trabajo a
         // una cuenta de consulta le daría una bandeja que no puede atender,
         // porque no puede aprobar ni denegar nada.
-        $stmt = $pdo->prepare("SELECT rol, activo FROM Usuario WHERE id_usuario = :id");
+        $stmt = $pdo->prepare("SELECT nombre, rol, activo FROM Usuario WHERE id_usuario = :id");
         $stmt->bindValue(':id', $usuarioId, PDO::PARAM_INT);
         $stmt->execute();
         $cuenta = $stmt->fetch();
@@ -70,6 +71,13 @@ ejecutar(function () use ($pdo) {
                 responderError('No existe una organización con ese identificador.', 404);
             }
         }
+
+        // El nombre de a quién se asignó se guarda en el detalle, no solo el
+        // id: dentro de un año, "asignó a la cuenta 7" no le dice nada a nadie.
+        registrarBitacora($pdo, $usuarioId === null ? 'osc.desasignar' : 'osc.asignar', [
+            'id_osc'  => (int) $id,
+            'detalle' => $usuarioId === null ? null : 'Asignada a ' . ($cuenta['nombre'] ?? "cuenta $usuarioId"),
+        ]);
 
         return ['asignadas' => 1, 'usuario_id' => $usuarioId];
     }
@@ -118,6 +126,15 @@ ejecutar(function () use ($pdo) {
         $pdo->rollBack();
         throw $e;
     }
+
+    // Un solo registro para el lote y no uno por organización: la bitácora
+    // debe contar lo que una persona HIZO, y lo que hizo fue una operación.
+    // Cientos de renglones idénticos ahogarían el resto del reporte.
+    registrarBitacora($pdo, 'osc.asignar_lote', [
+        'detalle' => count($ids) . ' organizaciones '
+            . ($usuarioId === null ? 'quedaron sin responsable'
+                                   : 'asignadas a ' . ($cuenta['nombre'] ?? "cuenta $usuarioId")),
+    ]);
 
     return ['asignadas' => count($ids), 'usuario_id' => $usuarioId, 'confirmado' => true];
 }, ['POST'], roles: ['admin']);

@@ -206,5 +206,13 @@ ejecutar(function () use ($pdo) {
     $resumen['confirmado']   = true;
     $resumen['creadas']      = $creadas;
     $resumen['actualizadas'] = $actualizadas;
+
+    // Fuera de la transacción: si la bitácora fallara, la importación ya
+    // ocurrió y revertirla por no poder anotarla sería el peor de los mundos.
+    registrarBitacora($pdo, 'padron.importar', [
+        'detalle' => "$creadas organizaciones creadas y $actualizadas actualizadas "
+            . 'desde ' . ($archivo['name'] ?? 'un archivo CSV'),
+    ]);
+
     return $resumen;
 }, ['POST'], roles: ['admin']);

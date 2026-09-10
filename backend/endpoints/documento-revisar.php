@@ -69,5 +69,24 @@ ejecutar(function () use ($pdo) {
         }
     }
 
+    // Se guarda de qué OSC y qué tipo de documento era: sin eso, la bitácora
+    // diría "aprobó el documento 47", que dentro de un mes no significa nada.
+    $ctx = $pdo->prepare(
+        'SELECT d.id_osc, d.tipo_documento, o.razon_social
+         FROM Documentacion d LEFT JOIN OSC o ON o.id_osc = d.id_osc
+         WHERE d.id_documento = :id'
+    );
+    $ctx->bindValue(':id', (int) $id, PDO::PARAM_INT);
+    $ctx->execute();
+    $doc = $ctx->fetch() ?: [];
+
+    registrarBitacora($pdo, 'documento.' . ($decision === 'aprobar' ? 'aprobar'
+                                          : ($decision === 'rechazar' ? 'rechazar' : 'vencido')), [
+        'id_osc'       => isset($doc['id_osc']) ? (int) $doc['id_osc'] : null,
+        'id_documento' => (int) $id,
+        'detalle'      => ($doc['tipo_documento'] ?? 'Documento')
+            . ($decision === 'rechazar' ? " · Motivo: $motivo" : ''),
+    ]);
+
     return ['id_documento' => (int) $id, 'estatus' => DECISIONES[$decision]];
 }, ['POST'], roles: ['admin', 'revisor']);

@@ -88,3 +88,8 @@
   color: var(--color-peligro);
   border-top: 1px solid var(--color-borde);
 }
+
+.export-btn__icon--mov {
+  color: #fff;
+  background: var(--color-primario);
+}

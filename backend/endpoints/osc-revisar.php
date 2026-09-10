@@ -91,6 +91,11 @@ ejecutar(function () use ($pdo) {
         }
     }
 
+    registrarBitacora($pdo, 'osc.' . $decision, [
+        'id_osc'  => (int) $id,
+        'detalle' => $decision === 'denegar' ? "Motivo: $motivo" : null,
+    ]);
+
     return [
         'id_osc'           => (int) $id,
         'estatus_revision' => $estatus,

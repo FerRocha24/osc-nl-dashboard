@@ -82,8 +82,13 @@ ejecutar(function () use ($pdo) {
             ':h' => password_hash($password, PASSWORD_BCRYPT), ':r' => $rol,
         ]);
 
+        $nuevoId = (int) $pdo->lastInsertId();
+        registrarBitacora($pdo, 'usuario.crear', [
+            'detalle' => "Cuenta de $nombre ($usuario) con rol $rol",
+        ]);
+
         return [
-            'id_usuario' => (int) $pdo->lastInsertId(),
+            'id_usuario' => $nuevoId,
             'creado'     => true,
             // Se avisa para que la pantalla pueda decir que a partir de ahora
             // se entra con esta cuenta y ya no con la de arranque.
@@ -142,6 +147,18 @@ ejecutar(function () use ($pdo) {
 
     $pdo->prepare('UPDATE Usuario SET ' . implode(', ', $campos) . ' WHERE id_usuario = :id')
         ->execute($params);
+
+    // Qué cambió, no solo que cambió: "modificó la cuenta 5" no sirve para
+    // auditar. La contraseña se menciona sin registrarla, obviamente.
+    $cambios = [];
+    if ($nombre !== '')                 $cambios[] = "nombre a \"$nombre\"";
+    if ($rol !== '' && $rol !== $antes['rol']) $cambios[] = "rol de {$antes['rol']} a $rol";
+    if (array_key_exists('activo', $c)) $cambios[] = $c['activo'] ? 'reactivada' : 'desactivada';
+    if ($password !== '')               $cambios[] = 'contraseña restablecida';
+
+    registrarBitacora($pdo, 'usuario.modificar', [
+        'detalle' => 'Cuenta ' . $id . ': ' . (implode(', ', $cambios) ?: 'sin cambios visibles'),
+    ]);
 
     return ['id_usuario' => $id, 'actualizado' => true];
 }, ['POST'], roles: ['admin']);

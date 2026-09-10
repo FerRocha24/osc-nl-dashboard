@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { tieneRol } from "../api/auth";
 import { construirCsv, descargarArchivo, nombreConFecha } from "../api/exportar";
 import "./ExportButton.css";
 
@@ -10,7 +11,7 @@ import "./ExportButton.css";
  * agregados. `obtenerDatos` es asíncrona porque la Operativa vuelve a pedir
  * TODAS las filas que cumplen el filtro, no solo la página que se ve.
  */
-export default function ExportButton({ exportacion }) {
+export default function ExportButton({ exportacion, onReporte }) {
   const [abierto, setAbierto] = useState(false);
   const [ocupado, setOcupado] = useState(false);
   const [error, setError] = useState(null);
@@ -49,24 +50,13 @@ export default function ExportButton({ exportacion }) {
     }
   };
 
-  // Para el PDF se usa la impresión del navegador en vez de una librería:
-  // agrega ~250 KB al bundle y produce un resultado peor que el motor de
-  // impresión, que ya sabe paginar. Las reglas @media print de Pages.css
-  // ocultan los controles y dejan solo el contenido.
-  const exportarPdf = () => {
-    setAbierto(false);
-    // El menú tiene que cerrarse antes de imprimir o sale en la hoja.
-    setTimeout(() => window.print(), 100);
-  };
-
   return (
     <div className="export-btn" ref={ref}>
       <button
         type="button"
         className="export-btn__trigger"
         onClick={() => setAbierto(!abierto)}
-        disabled={!exportacion}
-        title={exportacion ? undefined : "Nada que exportar en esta vista"}
+        disabled={!exportacion && !onReporte}
       >
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
           <path d="M12 3v12m0 0l-4-4m4 4l4-4M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"
@@ -81,10 +71,21 @@ export default function ExportButton({ exportacion }) {
             <span className="export-btn__icon export-btn__icon--xls">CSV</span>
             {ocupado ? "Preparando…" : (exportacion?.etiquetaCsv ?? "Exportar datos")}
           </button>
-          <button type="button" className="export-btn__item" onClick={exportarPdf}>
-            <span className="export-btn__icon export-btn__icon--pdf">PDF</span>
-            Imprimir o guardar en PDF
-          </button>
+          {/* Antes había aquí un "Imprimir o guardar en PDF" que llamaba a
+              window.print(): era una captura de la pantalla, no un reporte, y
+              no respondía ninguna pregunta que no se conteste mirando el
+              tablero. Lo sustituye el reporte de movimientos, que sí dice qué
+              se hizo, sobre qué organización, quién y cuándo. */}
+          {tieneRol("admin", "revisor") && (
+            <button
+              type="button"
+              className="export-btn__item"
+              onClick={() => { setAbierto(false); onReporte?.(); }}
+            >
+              <span className="export-btn__icon export-btn__icon--mov">LOG</span>
+              Reporte de movimientos
+            </button>
+          )}
           {error && <p className="export-btn__error" role="alert">{error}</p>}
         </div>
       )}

@@ -87,5 +87,10 @@ ejecutar(function () use ($pdo) {
         }
     }
 
+    registrarBitacora($pdo, 'osc.operacion', [
+        'id_osc'  => (int) $id,
+        'detalle' => $estatus === '' ? 'Se dejó sin dato' : "Estatus: $estatus",
+    ]);
+
     return ['id_osc' => (int) $id, 'estatus_operacion' => $nulo($estatus)];
 }, ['POST'], roles: ['admin', 'revisor']);

@@ -65,8 +65,15 @@ ejecutar(function () use ($pdo) {
         throw $e;
     }
 
+    $idDocumento = (int) $pdo->lastInsertId();
+    registrarBitacora($pdo, 'documento.subir', [
+        'id_osc'       => (int) $osc,
+        'id_documento' => $idDocumento,
+        'detalle'      => $tipo . ' · ' . $meta['nombre_original'],
+    ]);
+
     return [
-        'id_documento'   => (int) $pdo->lastInsertId(),
+        'id_documento'   => $idDocumento,
         'nombre_original'=> $meta['nombre_original'],
         'tipo_mime'      => $meta['tipo_mime'],
         'tamano_bytes'   => $meta['tamano_bytes'],
