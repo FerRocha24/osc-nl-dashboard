@@ -1,0 +1,47 @@
+# Configuración del Tablero OSC NL — PLANTILLA
+#
+# Copiar a /etc/httpd/conf.d/osc-api-env.conf, llenar los valores y dejarlo
+# en modo 600 propiedad de root:
+#
+#   sudo chown root:root /etc/httpd/conf.d/osc-api-env.conf
+#   sudo chmod 600 /etc/httpd/conf.d/osc-api-env.conf
+#
+# POR QUÉ VIVE APARTE Y NO DENTRO DEL VIRTUALHOST
+#
+# Certbot regenera el VirtualHost en cada renovación del certificado. Si las
+# variables estuvieran ahí, una renovación puede llevárselas y la aplicación
+# pierde su configuración meses después, sin relación aparente con nada. Ya
+# pasó dos veces en este proyecto: una con los permisos del archivo, y otra
+# con ARCHIVOS_DIR, que simplemente nunca llegó a estar y solo se notó al
+# intentar subir el primer documento.
+#
+# El VirtualHost solo lo incluye:
+#   IncludeOptional /etc/httpd/conf.d/osc-api-env.conf
+
+# ---- Base de datos --------------------------------------------------------
+SetEnv DB_HOST      servidor-de-base-de-datos
+SetEnv DB_NAME      osc_nl
+SetEnv DB_USER      usuario_de_la_aplicacion
+SetEnv DB_PASSWORD  contrasena
+
+# ---- Firma de las sesiones ------------------------------------------------
+# Generar una propia:  php -r "echo bin2hex(random_bytes(32));"
+SetEnv APP_SECRET   cadena-larga-y-aleatoria
+
+# ---- Cuenta de arranque ---------------------------------------------------
+# Solo sirve mientras la tabla Usuario está vacía. En cuanto se crea la
+# primera cuenta real, deja de funcionar.
+# Generar el hash:  php -r "echo password_hash('la-contrasena', PASSWORD_BCRYPT);"
+SetEnv AUTH_USUARIO        admin
+SetEnv AUTH_PASSWORD_HASH  hash-bcrypt
+SetEnv AUTH_HORAS_VIGENCIA 12
+
+# ---- Documentos del expediente --------------------------------------------
+# DEBE quedar fuera del DocumentRoot: si el servidor web pudiera servir esta
+# carpeta, cualquiera con la URL leería actas y comprobantes sin iniciar
+# sesión.
+SetEnv ARCHIVOS_DIR /var/osc-archivos
+
+# ---- Origen de la interfaz ------------------------------------------------
+# Sin este valor, la API acepta peticiones desde cualquier dominio.
+SetEnv CORS_ORIGENES https://tablero.ejemplo.gob.mx
