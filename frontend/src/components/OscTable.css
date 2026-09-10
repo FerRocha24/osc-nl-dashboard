@@ -115,15 +115,6 @@
   color: white !important;
 }
 
-@media (max-width: 700px) {
-  .osc-table-wrapper {
-    overflow-x: auto;
-  }
-  .osc-table {
-    min-width: 640px;
-  }
-}
-
 /* Folio del Registro Estatal: numérico y corto, se alinea a la derecha y con
    tipografía tabular para que los dígitos queden en columna. */
 .osc-table__folio {
@@ -207,4 +198,116 @@
 .osc-table__sin {
   color: var(--color-texto-suave);
   font-style: italic;
+}
+
+/* ---- En pantallas angostas, la tabla se vuelve una lista de tarjetas ----
+   Con nueve columnas en 375 px, cada celda se parte en varios renglones y una
+   sola organización ocupa más que la pantalla completa: hay que desplazarse a
+   lo ancho para ver la mitad de los datos y a lo alto para pasar de una fila a
+   la siguiente. Apilada, cada organización se lee de un vistazo.
+
+   El rótulo sale del atributo data-etiqueta de cada celda, así que vive junto
+   al dato en el JSX y no puede quedar desfasado del encabezado. */
+@media (max-width: 700px) {
+  .osc-table-wrapper { overflow-x: visible; }
+
+  /* Sin esto la tabla no se encoge. El contenedor es un elemento flexible
+     dentro de la columna de la página, y min-width:auto le impide bajar del
+     ancho mínimo de su contenido: la fila de paginación —"Mostrando 1-10 de
+     779" más los botones más "Ir a la página"— lo estiraba a 640 px, y los
+     valores de cada tarjeta quedaban fuera de la pantalla. */
+  .osc-table-wrapper { min-width: 0; }
+
+  /* El ancho mínimo que hace legibles las nueve columnas en escritorio es
+     justo lo que impide que quepan aquí. */
+  .osc-table { min-width: 0; }
+
+  .osc-table,
+  .osc-table tbody,
+  .osc-table tr,
+  .osc-table td {
+    display: block;
+    width: auto;
+  }
+
+  /* El encabezado no se oculta con display:none para los lectores de
+     pantalla: se saca del flujo visual conservándolo en el árbol. */
+  .osc-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  .osc-table tr {
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    background: var(--color-superficie);
+    border: 1px solid var(--color-borde);
+    border-radius: var(--radio);
+  }
+
+  .osc-table tr:hover { background: var(--color-superficie); }
+
+  .osc-table td {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 4px 0;
+    border: none;
+    text-align: right;
+  }
+
+  .osc-table td::before {
+    content: attr(data-etiqueta);
+    flex-shrink: 0;
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    text-align: left;
+    color: var(--color-texto-suave);
+  }
+
+  /* Folio y razón social son la identidad de la tarjeta, no un par
+     etiqueta-valor: van arriba, alineados a la izquierda y sin rótulo. */
+  .osc-table td.osc-table__folio,
+  .osc-table td.osc-table__razon {
+    display: block;
+    text-align: left;
+    padding: 0;
+  }
+
+  .osc-table td.osc-table__folio::before,
+  .osc-table td.osc-table__razon::before { content: none; }
+
+  .osc-table td.osc-table__folio {
+    font-size: 10.5px;
+    letter-spacing: 0.04em;
+    color: var(--color-texto-suave);
+  }
+
+  .osc-table td.osc-table__razon {
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+    font-size: 14px;
+    line-height: 1.35;
+    border-bottom: 1px solid var(--color-borde);
+  }
+
+  .osc-table__responsable { white-space: normal; }
+}
+
+@media (max-width: 700px) {
+  .osc-table__pagination {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .osc-table__pagination-controls { justify-content: center; }
+  .osc-table__ir { justify-content: center; }
 }

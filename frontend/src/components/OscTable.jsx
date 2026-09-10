@@ -135,23 +135,23 @@ export default function OscTable({
                   }
                 }}
               >
-                <td className="osc-table__folio">{row.no_registro ?? "—"}</td>
-                <td className="osc-table__razon">{row.razon_social}</td>
-                <td>{row.municipio ?? "—"}</td>
-                <td>{row.rubro ?? "—"}</td>
-                <td><OperacionBadge operacion={row.estatus_operacion} /></td>
-                <td>
+                <td className="osc-table__folio" data-etiqueta="Folio">{row.no_registro ?? "—"}</td>
+                <td className="osc-table__razon" data-etiqueta="Razón social">{row.razon_social}</td>
+                <td data-etiqueta="Municipio">{row.municipio ?? "—"}</td>
+                <td data-etiqueta="Rubro">{row.rubro ?? "—"}</td>
+                <td data-etiqueta="Operación"><OperacionBadge operacion={row.estatus_operacion} /></td>
+                <td data-etiqueta="Expediente">
                   <ExpedienteBadge
                     aprobados={row.documentos_aprobados ?? 0}
                     requeridos={requeridos}
                     estatus={row.estatus_documental}
                   />
                 </td>
-                <td><ResolucionBadge resolucion={row.estatus_revision ?? "Pendiente"} /></td>
-                <td className="osc-table__responsable">
+                <td data-etiqueta="Resolución"><ResolucionBadge resolucion={row.estatus_revision ?? "Pendiente"} /></td>
+                <td className="osc-table__responsable" data-etiqueta="Responsable">
                   {row.asignado_a ?? <span className="osc-table__sin">Sin asignar</span>}
                 </td>
-                <td>{formatearFecha(row.ultima_actualizacion)}</td>
+                <td data-etiqueta="Actualización">{formatearFecha(row.ultima_actualizacion)}</td>
               </tr>
             ))}
           </tbody>
