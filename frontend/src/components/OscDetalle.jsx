@@ -27,8 +27,18 @@ function formatearFecha(valor) {
   });
 }
 
-export default function OscDetalle({ idOsc, onCerrar }) {
+export default function OscDetalle({ idOsc, onCerrar, onCambio }) {
   const { datos, cargando, error, recargar } = useApi("osc-detalle.php", { id: idOsc });
+
+  // Cualquier cambio hecho aquí dentro recarga la ficha Y avisa a la página.
+  // Sin lo segundo, la fila de la tabla que quedó detrás y las tarjetas de
+  // arriba siguen mostrando el estado anterior: la persona aprueba un
+  // documento, cierra la ficha, y el padrón le dice que no pasó nada. Parecía
+  // que el sistema había perdido el cambio.
+  const alCambiar = () => {
+    recargar();
+    onCambio?.();
+  };
 
   // Escape cierra el panel, y mientras está abierto se bloquea el scroll del
   // fondo para que la rueda del ratón mueva la ficha y no la tabla de atrás.
@@ -133,27 +143,27 @@ export default function OscDetalle({ idOsc, onCerrar }) {
                 {/* La resolución va ANTES del expediente: es la conclusión, y
                     quien abre la ficha quiere saber primero en qué quedó. */}
                 <section className="detalle__seccion">
-                  <OperacionOsc osc={osc} onGuardado={recargar} />
+                  <OperacionOsc osc={osc} onGuardado={alCambiar} />
                 </section>
 
                 {/* Antes de la resolución: primero se sabe de quién es el
                     expediente, luego en qué quedó. */}
                 <section className="detalle__seccion">
-                  <AsignarOsc osc={osc} onAsignado={recargar} />
+                  <AsignarOsc osc={osc} onAsignado={alCambiar} />
                 </section>
 
                 <section className="detalle__seccion">
-                  <ResolucionOsc osc={osc} onResuelto={recargar} />
+                  <ResolucionOsc osc={osc} onResuelto={alCambiar} />
                 </section>
 
                 {/* Antes del digital: si el papel es el original, saber
                     dónde está es lo primero que hace falta para revisarlo. */}
                 <section className="detalle__seccion">
-                  <ExpedienteFisico osc={osc} onGuardado={recargar} />
+                  <ExpedienteFisico osc={osc} onGuardado={alCambiar} />
                 </section>
 
                 <section className="detalle__seccion">
-                  <Expediente idOsc={osc.id_osc} />
+                  <Expediente idOsc={osc.id_osc} onCambio={alCambiar} />
                 </section>
 
                 <section className="detalle__seccion">

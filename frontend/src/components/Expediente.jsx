@@ -31,7 +31,7 @@ function formatearFechaHora(valor) {
     : f.toLocaleString("es-MX", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
 }
 
-export default function Expediente({ idOsc }) {
+export default function Expediente({ idOsc, onCambio }) {
   // Se reutiliza useApi en vez de repetir la carga a mano: ya resuelve el
   // estado de carga, la cancelación al desmontar y el 401 por sesión vencida.
   const { datos, cargando, error: errorCarga, recargar } = useApi(
@@ -75,6 +75,9 @@ export default function Expediente({ idOsc }) {
       datos.append("archivo", archivo);
       await subirArchivo("documento-subir.php", datos);
       recargar();
+      // El avance del expediente cambia el estatus documental de la OSC, que
+      // se ve en la tabla y en los indicadores, no solo aquí.
+      onCambio?.();
     } catch (e) {
       setErrorSubida(e.message);
     } finally {
@@ -90,6 +93,7 @@ export default function Expediente({ idOsc }) {
       setRechazando(null);
       setMotivo("");
       recargar();
+      onCambio?.();
     } catch (e) {
       setError(e.message);
     }

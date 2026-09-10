@@ -140,7 +140,11 @@ export default function OperativaPage() {
       )}
 
       {oscSeleccionada !== null && (
-        <OscDetalle idOsc={oscSeleccionada} onCerrar={() => setOscSeleccionada(null)} />
+        <OscDetalle
+          idOsc={oscSeleccionada}
+          onCerrar={() => setOscSeleccionada(null)}
+          onCambio={() => { padron.recargar(); kpis.recargar(); }}
+        />
       )}
     </div>
   );
