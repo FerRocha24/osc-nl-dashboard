@@ -2,6 +2,11 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  /* Envuelve siempre, no solo en la consulta de medios de abajo: así el
+     encabezado nunca puede desbordar la página por unos pocos píxeles en un
+     ancho intermedio que nadie probó. La consulta define el diseño móvil
+     deliberado; esto es la red de seguridad para todo lo demás. */
+  flex-wrap: wrap;
   gap: 24px;
   padding: 0 32px;
   height: 68px;
@@ -81,9 +86,10 @@
   color: var(--color-texto);
 }
 
-@media (max-width: 900px) {
+/* 1000 y no 900: con la fecha, los dos botones y el perfil, la versión de
+   escritorio necesita unos 980 px. Entre 900 y 980 se desbordaba. */
+@media (max-width: 1000px) {
   .dash-header {
-    flex-wrap: wrap;
     height: auto;
     padding: 12px 16px;
     gap: 12px;

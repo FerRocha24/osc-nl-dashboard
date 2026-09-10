@@ -2,7 +2,16 @@
   background-color: var(--color-superficie);
   border: 1px solid var(--color-borde);
   border-radius: var(--radio);
-  overflow: hidden;
+  /* auto y no hidden: hidden estaba puesto para que el contenido respetara
+     las esquinas redondeadas, pero recortaba la tabla cuando no cabía y las
+     últimas columnas quedaban invisibles e inalcanzables. Con auto, lo que no
+     cabe se desplaza en lugar de desaparecer. */
+  overflow-x: auto;
+  /* Sin esto, overflow-x:auto no sirve de nada. Este contenedor es un elemento
+     flexible dentro de la columna de la página, y min-width:auto le impide
+     encogerse por debajo del ancho de la tabla: en vez de desplazarse la
+     tabla, se desbordaba la página entera hacia los lados. */
+  min-width: 0;
 }
 
 .osc-table {
@@ -184,8 +193,10 @@
 
 .osc-table__ir button:disabled { opacity: 0.5; cursor: default; }
 
-/* En pantallas chicas el salto se va a su propio renglón, completo. */
-@media (max-width: 720px) {
+/* En pantallas chicas el salto se va a su propio renglón, completo. Mismo
+   corte que las tarjetas, para que la paginación cambie a la vez que la tabla
+   y no en dos pasos. */
+@media (max-width: 900px) {
   .osc-table__pagination { justify-content: flex-start; }
   .osc-table__ir { width: 100%; }
 }
@@ -208,15 +219,12 @@
 
    El rótulo sale del atributo data-etiqueta de cada celda, así que vive junto
    al dato en el JSX y no puede quedar desfasado del encabezado. */
-@media (max-width: 700px) {
+/* El corte va en 900 px y no en 700: la tabla necesita unos 950 px para que
+   sus nueve columnas se lean sin partir palabras. Entre 700 y 900 seguía
+   siendo una tabla apretada que obligaba a desplazarse a lo ancho, que en una
+   tableta es una forma de esconder datos. */
+@media (max-width: 900px) {
   .osc-table-wrapper { overflow-x: visible; }
-
-  /* Sin esto la tabla no se encoge. El contenedor es un elemento flexible
-     dentro de la columna de la página, y min-width:auto le impide bajar del
-     ancho mínimo de su contenido: la fila de paginación —"Mostrando 1-10 de
-     779" más los botones más "Ir a la página"— lo estiraba a 640 px, y los
-     valores de cada tarjeta quedaban fuera de la pantalla. */
-  .osc-table-wrapper { min-width: 0; }
 
   /* El ancho mínimo que hace legibles las nueve columnas en escritorio es
      justo lo que impide que quepan aquí. */
@@ -301,7 +309,7 @@
   .osc-table__responsable { white-space: normal; }
 }
 
-@media (max-width: 700px) {
+@media (max-width: 900px) {
   .osc-table__pagination {
     flex-direction: column;
     align-items: stretch;
