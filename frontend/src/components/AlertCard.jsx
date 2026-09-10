@@ -1,3 +1,4 @@
+import NotaInfo from "./NotaInfo";
 import "./AlertCard.css";
 
 function getStatusColor(value, thresholds = { good: 80, warn: 60 }) {
@@ -6,7 +7,21 @@ function getStatusColor(value, thresholds = { good: 80, warn: 60 }) {
   return "peligro";
 }
 
-export function AlertRing({ label, value }) {
+export function AlertRing({ label, value, faltante }) {
+  // null no es cero. Cero significa "medimos y ninguna cumple"; null, "no
+  // tenemos con qué medirlo". Pintar cero en ese caso afirma algo falso.
+  if (value === null || value === undefined) {
+    return (
+      <div className="alert-card alert-card--sin-dato">
+        <span className="alert-card__sin-dato">
+          Sin dato
+          {faltante && <NotaInfo etiqueta={`Por qué falta: ${label}`}>{faltante}</NotaInfo>}
+        </span>
+        <p className="alert-card__label">{label}</p>
+      </div>
+    );
+  }
+
   const color = getStatusColor(value);
   const circumference = 2 * Math.PI * 36;
   const offset = circumference - (value / 100) * circumference;
@@ -33,7 +48,7 @@ export function AlertRing({ label, value }) {
   );
 }
 
-export function AlertBar({ label, value }) {
+export function AlertBar({ label, value, pie }) {
   const color = getStatusColor(value);
   return (
     <div className={`alert-card alert-card--${color}`}>
@@ -45,6 +60,10 @@ export function AlertBar({ label, value }) {
         />
       </div>
       <span className="alert-card__bar-value">{value}%</span>
+      {/* El conteo acompaña al porcentaje porque el denominador es enorme:
+          los primeros documentos mueven la cifra tan poco que sin él parece
+          que el sistema no los registró. */}
+      {pie && <span className="alert-card__pie">{pie}</span>}
     </div>
   );
 }

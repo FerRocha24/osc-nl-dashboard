@@ -22,3 +22,16 @@
   color: var(--color-texto-suave);
   font-weight: 500;
 }
+
+/* En gris y más chico que un número: no es bueno ni malo, es ausencia, y no
+   debe competir visualmente con las tarjetas que sí tienen dato. */
+.big-number-card__sin-dato {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--fuente-titulos);
+  font-size: 21px;
+  font-weight: 600;
+  line-height: 1.1;
+  color: var(--color-texto-suave);
+}

@@ -82,11 +82,16 @@ export default function OperativaPage() {
             <>
               <AlertRing
                 label="OSC con donataria vigente"
-                value={kpis.datos?.porcentaje_donataria_vigente ?? 0}
+                value={kpis.datos?.porcentaje_donataria_vigente}
+                faltante={kpis.datos?.faltantes?.porcentaje_donataria_vigente}
               />
               <AlertBar
                 label="Completitud documental promedio"
                 value={kpis.datos?.porcentaje_completitud_documental ?? 0}
+                pie={kpis.datos?.detalle
+                  ? `${kpis.datos.detalle.documentos_aprobados.toLocaleString("es-MX")} de `
+                    + `${kpis.datos.detalle.documentos_requeridos.toLocaleString("es-MX")} documentos`
+                  : null}
               />
               <AlertNumber
                 label="OSC con documentación incompleta"

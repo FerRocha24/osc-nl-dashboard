@@ -98,3 +98,26 @@
   font-size: 11.5px;
   color: var(--color-texto-suave);
 }
+
+.alert-card--sin-dato { border-left-color: var(--color-borde); }
+
+/* Gris y más chico que un número: es ausencia, no resultado, y no debe
+   competir con las tarjetas que sí tienen dato. */
+.alert-card__sin-dato {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 88px;
+  font-family: var(--fuente-titulos);
+  font-size: 21px;
+  font-weight: 600;
+  color: var(--color-texto-suave);
+}
+
+.alert-card__pie {
+  margin-top: 2px;
+  font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-texto-suave);
+}

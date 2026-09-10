@@ -126,19 +126,27 @@ export default function EstrategicaPage() {
                 value={(m?.total_osc_activas ?? 0).toLocaleString("es-MX")}
                 accent="primario"
               />
+              {/* null y no cero: el backend distingue "no se puede calcular"
+                  de "el valor medido es cero". */}
               <BigNumberCard
                 label="Total de beneficiarios atendidos"
-                value={(m?.total_beneficiarios ?? 0).toLocaleString("es-MX")}
+                value={m?.total_beneficiarios == null
+                  ? null : m.total_beneficiarios.toLocaleString("es-MX")}
+                faltante={m?.faltantes?.total_beneficiarios}
                 accent="azul"
               />
               <BigNumberCard
                 label="OSC con gobernanza formal"
-                value={`${m?.porcentaje_gobernanza_formal ?? 0}%`}
+                value={m?.porcentaje_gobernanza_formal == null
+                  ? null : `${m.porcentaje_gobernanza_formal}%`}
+                faltante={m?.faltantes?.porcentaje_gobernanza_formal}
                 accent="verde"
               />
               <BigNumberCard
                 label="Dependencia de fondos públicos"
-                value={`${m?.porcentaje_dependencia_fondos_publicos ?? 0}%`}
+                value={m?.porcentaje_dependencia_fondos_publicos == null
+                  ? null : `${m.porcentaje_dependencia_fondos_publicos}%`}
+                faltante={m?.faltantes?.porcentaje_dependencia_fondos_publicos}
                 accent="morado"
               />
             </>

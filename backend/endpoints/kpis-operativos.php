@@ -28,6 +28,15 @@ ejecutar(function () use ($pdo) {
     $conDonataria  = (int) $fila['con_donataria'];
     $pctDonataria  = $totalOsc > 0 ? round($conDonataria * 100 / $totalOsc, 1) : 0.0;
 
+    // Si NINGUNA organización tiene fecha de publicación en el DOF, el
+    // indicador no se puede calcular y devolver 0 % sería afirmar que ninguna
+    // tiene donataria vigente. No lo sabemos: el padrón importado no trae ese
+    // campo. Se distingue el cero medido del dato ausente.
+    $conFechaDof = (int) $pdo->query(
+        'SELECT COUNT(fecha_ultima_publicacion_dof) FROM OSC'
+    )->fetchColumn();
+    $hayDatosDonataria = $conFechaDof > 0;
+
     // --- KPI 2: % de completitud documental ---
     // Se divide entre lo REQUERIDO, no entre lo entregado.
     //
@@ -81,13 +90,17 @@ ejecutar(function () use ($pdo) {
     $fila = $pdo->query($sql)->fetch();
 
     return [
-        'porcentaje_donataria_vigente'      => $pctDonataria,
+        'porcentaje_donataria_vigente'      => $hayDatosDonataria ? $pctDonataria : null,
         'porcentaje_completitud_documental' => $pctCompletitud,
         'osc_documentacion_incompleta'      => $oscIncompletas,
         'osc_aceptadas'                     => (int) $fila['aceptadas'],
         'osc_denegadas'                     => (int) $fila['denegadas'],
         'osc_por_resolver'                  => (int) $fila['por_resolver'],
         // Contexto útil para depurar y para mostrar "23 de 327" en la UI
+        'faltantes' => [
+            'porcentaje_donataria_vigente' => $hayDatosDonataria ? null
+                : 'Se calcula con la fecha de publicación en el DOF, que el padrón actual no incluye.',
+        ],
         'detalle' => [
             'total_osc'            => $totalOsc,
             'osc_con_donataria'    => $conDonataria,
