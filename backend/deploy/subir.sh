@@ -12,6 +12,8 @@ set -euo pipefail
 DESTINO="${1:-}"
 LLAVE="${2:-}"
 RUTA_REMOTA="/var/www/osc-api"
+# Los documentos del expediente van fuera del DocumentRoot a propósito.
+RUTA_ARCHIVOS="/var/osc-archivos"
 
 if [ -z "$DESTINO" ]; then
   echo "Uso: ./subir.sh usuario@host [ruta/a/llave.pem]"
@@ -51,7 +53,14 @@ rsync -avz --delete \
 # con una configuración rota.
 echo ""
 echo "Ajustando permisos y recargando Apache ..."
-$SSH "$DESTINO" "sudo chown -R apache:apache $RUTA_REMOTA \
+# La carpeta de documentos se crea aquí y no como paso manual documentado:
+# vive FUERA del árbol que se sincroniza —para que Apache no pueda servirla—
+# así que rsync nunca la tocaría, y olvidarla no da error al desplegar sino
+# al intentar subir el primer documento, semanas después.
+$SSH "$DESTINO" "sudo mkdir -p $RUTA_ARCHIVOS \
+  && sudo chown apache:apache $RUTA_ARCHIVOS \
+  && sudo chmod 750 $RUTA_ARCHIVOS \
+  && sudo chown -R apache:apache $RUTA_REMOTA \
   && sudo apachectl configtest \
   && sudo systemctl reload httpd"
 
